@@ -1,117 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:background="@drawable/table"
+    android:gravity="center_horizontal">
+
+    <TableLayout
+        android:layout_marginTop="100dp"
+        android:id="@+id/board"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/board"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true" />
+        android:layout_centerHorizontal="true"
+        android:background="@color/colorPrimary"></TableLayout>
 
-    <ImageView
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:src="@drawable/black"
-        android:layout_marginTop="163dp"
-        android:layout_marginLeft="90dp" />
-
-    <ImageView
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginLeft="159dp"
-        android:src="@drawable/black"
-
-        android:layout_marginTop="163dp"
-        />
-
-    <ImageView
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginLeft="228dp"
-        android:src="@drawable/black"
-
-        android:layout_marginTop="163dp"
-        />
-    <ImageView
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginLeft="297dp"
-        android:src="@drawable/black"
-
-        android:layout_marginTop="163dp"
-        />
-    <ImageView
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:src="@drawable/black"
-        android:layout_marginTop="196dp"
-        android:layout_marginLeft="56dp" />
-
-    <ImageView
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginLeft="125dp"
-        android:src="@drawable/black"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="196dp"
-        />
-
-    <ImageView
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginLeft="194dp"
-        android:src="@drawable/black"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="196dp"
-        />
-    <ImageView
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginLeft="263dp"
-        android:src="@drawable/black"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="196dp"
-        />
-    <ImageView
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:src="@drawable/black"
-        android:layout_marginTop="232dp"
-        android:layout_marginLeft="90dp" />
-
-    <ImageView
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginLeft="159dp"
-        android:src="@drawable/black"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="232dp"
-        />
-
-    <ImageView
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginLeft="228dp"
-        android:src="@drawable/black"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="232dp"
-        />
-    <ImageView
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginLeft="297dp"
-        android:src="@drawable/black"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="232dp"
-        />
-
-
-</RelativeLayout>
+</LinearLayout>
