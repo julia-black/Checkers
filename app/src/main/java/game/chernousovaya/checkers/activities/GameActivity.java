@@ -10,6 +10,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import game.chernousovaya.checkers.R;
@@ -32,13 +33,12 @@ public class GameActivity extends AppCompatActivity {
         }
     };
 
-    //Игрок играет за черные
+    //Игрок играет за черные (они делают 1й ход)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         mBoard = new Board();
-        mBoard.showBoard();
         chooseCell = new Cell();
         renderBoard();
 
@@ -50,7 +50,8 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void renderBoard() {
-        //mBoard.showBoard();
+        updateScore();
+        mBoard.showBoard();
         final TableLayout tableLayout = (TableLayout) findViewById(R.id.board);
         tableLayout.removeAllViews();
         tableLayout.setBackgroundColor(Color.WHITE);
@@ -123,10 +124,21 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
+    private void updateScore(){
+        TextView scoreView = (TextView) findViewById(R.id.score);
+        scoreView.setText(mBoard.getScore().getScoreBlack() + ":" + mBoard.getScore().getScoreWhite());
+
+    }
     private boolean isBlackCell(int i, int j) {
         return ((i % 2 == 0 && j % 2 != 0) || (i % 2 != 0 && j % 2 == 0));
     }
 
+    // //Проверка на то, можем ли мы ходить в выбранную клетку по правилам шашек
+    // private boolean isValidMove(){
+    //     if()
+    // }
+
+    //Ход противника
     private Cell movementEnemy(int i, int j) { //ход черных
 
         Log.i(LOG_TAG, "movement black");

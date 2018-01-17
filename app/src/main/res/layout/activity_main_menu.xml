@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:background="@drawable/checkers">
+    android:layout_height="match_parent"
+    android:background="@drawable/checkers"
+    android:orientation="vertical">
 
     <Button
+        android:id="@+id/startButton"
         android:layout_width="280dp"
         android:layout_height="120dp"
-        android:scaleType="fitCenter"
-        android:background="@drawable/start_but_down"
-        android:layout_marginBottom="142dp"
         android:layout_alignParentBottom="true"
-        android:id="@+id/startButton"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="142dp"
+        android:background="@drawable/start_but_down"
+        android:scaleType="fitCenter" />
+
 </RelativeLayout>
