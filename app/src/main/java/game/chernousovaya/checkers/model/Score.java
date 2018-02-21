@@ -1,4 +1,4 @@
-package game.chernousovaya.checkers.structure;
+package game.chernousovaya.checkers.model;
 
 
 public class Score {
@@ -9,6 +9,8 @@ public class Score {
         scoreWhite = 0;
         scoreBlack = 0;
     }
+
+
 
     public void incScoreWhite(int value) { //увеличить счет на value
         scoreWhite += value;

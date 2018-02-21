@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         >
 
-        <activity android:name=".activities.MainMenu"
+        <activity android:name=".controller.activities.MainMenu"
             android:screenOrientation="portrait"
             >
 
@@ -23,7 +23,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.GameActivity"
+        <activity android:name=".controller.activities.GameActivity"
             android:screenOrientation="portrait">
         </activity>
     </application>

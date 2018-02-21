@@ -1,4 +1,4 @@
-package game.chernousovaya.checkers.structure;
+package game.chernousovaya.checkers.model;
 
 public class Cell {
     int x;
@@ -10,6 +10,14 @@ public class Cell {
     }
 
     public Cell() {
+    }
+
+    @Override
+    public String toString() {
+        return "Cell{" +
+                "x=" + x +
+                ", y=" + y +
+                '}';
     }
 
     public int getX() {

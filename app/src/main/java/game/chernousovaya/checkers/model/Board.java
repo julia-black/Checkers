@@ -1,4 +1,4 @@
-package game.chernousovaya.checkers.structure;
+package game.chernousovaya.checkers.model;
 
 
 import android.content.Context;
@@ -9,12 +9,15 @@ public class Board {
 
     private Score score;
 
+    private static final int COLOR_ENEMY = 1;
+    private static final int COLOR_PLAYER = 2;
     private static final int N = 8;
-    private static final String LOG_TAG = "Board";
+    private static final String LOG_TAG = Board.class.getSimpleName();
     int[][] arr = new int[N][N];
 
     //0 - пусто
-    //1 - белая шашка (ИИ)
+    //3- белая клетка, на нее нельзя ходить
+    //1 - белая шашка (компьютера)
     //2 - черная шашка (игрока)
 
     public Board() {
@@ -28,9 +31,10 @@ public class Board {
                 } else if ((i == 5 || i == 7) && j % 2 == 0
                         || (i == 6 && j % 2 != 0)) {
                     arr[i][j] = 2;
-                } else {
+                } else if (i == 3 && j % 2 == 0 || i == 4 && j % 2 != 0 ) {
                     arr[i][j] = 0;
-                }
+                } else
+                    arr[i][j] = 3;
             }
         }
     }
@@ -51,13 +55,13 @@ public class Board {
         arr[i][j] = checker;
     }
 
+    //ход шашки
     public boolean moveChecker(int begI, int begJ, int i, int j, int checker, Context context) { //checker - цвет выбранной шашки
         if (getCell(begI, begJ) == checker) { //если в этой ячейке стоит такой цвет
 
             if (arr[i][j] == 0) { //если конечная клетка пуста
 
                 if (isValidMove(begI, begJ, i, j, checker)) { //если это валидный ход по правилам английский шашек
-
                     setCell(i, j, checker);
                     setCell(begI, begJ, 0);
                     return true;
@@ -76,29 +80,52 @@ public class Board {
                 return false;
             }
         } else {
-            Log.i(LOG_TAG, "Ошибка");
+            Log.i(LOG_TAG, "Error, wrong current check");
             return false;
         }
     }
 
-    private boolean isValidMove(int begI, int begJ, int i, int j, int checker) {
+    //проверка хода на валидность
+    public boolean isValidMove(int begI, int begJ, int i, int j, int checker) {
 
-        if (checker == 1) { //если ходят белые
-            return true;
-        } else if (checker == 2) { //если ходят черные
-            //если они идут без взятия
-            if (i == begI - 1 && (j == begJ + 1 || j == begJ - 1)) {
-                return true;
-            }
-            //если идут со взятием
-            else if (i == begI - 2) {
-                //если идет влево и там стоит вражеская белая шашка
-                if (j == begJ - 2 && arr[i + 1][j + 1] == 1) {
-                    captureEnemyChecker(i + 1, j + 1, 1);
+        //Log.i(LOG_TAG, begI + " " + begJ + " " + i + " " + j);
+
+        if(arr[begI][begJ] != 3 && arr[i][j] != 3) {
+
+            if (checker == COLOR_ENEMY) { //если ходят белые
+                //если они идут без взятия
+                if (begI < 8 && ((i == begI + 1) && (begJ < 8 && (j == begJ + 1) || (begJ > 0 && (j == begJ - 1))))) {
                     return true;
-                } else if (j == begJ + 2 && arr[i + 1][j - 1] == 1) {
-                    captureEnemyChecker(i + 1, j - 1, 1);
+                }
+                //если идут со взятием
+                else if ((begI < 6 && i == begI + 2)) {
+                    //если идет влево и там стоит вражеская белая шашка
+                    if (begJ < 6 && i > 0 && j < 7 )
+                        if (j == begJ + 2 && arr[i - 1][j + 1] == 2) {
+                            captureEnemyChecker(i - 1, j + 1, 2);
+                            return true;
+                        } else if (begJ > 1 && i > 0 && j > 0 )
+                            if (j == begJ - 2 && arr[i - 1][j - 1] == 2) {
+                                captureEnemyChecker(i - 1, j - 1, 2);
+                                return true;
+                            }
+                }
+
+            } else if (checker == COLOR_PLAYER) { //если ходят черные
+                //если они идут без взятия
+                if (i == begI - 1 && (j == begJ + 1 || j == begJ - 1)) {
                     return true;
+                }
+                //если идут со взятием
+                else if (i == begI - 2) {
+                    //если идет влево и там стоит вражеская белая шашка
+                    if (j == begJ - 2 && arr[i + 1][j + 1] == 1) {
+                        captureEnemyChecker(i + 1, j + 1, 1);
+                        return true;
+                    } else if (j == begJ + 2 && arr[i + 1][j - 1] == 1) {
+                        captureEnemyChecker(i + 1, j - 1, 1);
+                        return true;
+                    }
                 }
             }
         }
@@ -116,6 +143,7 @@ public class Board {
 
     }
 
+    //отобразить в лог расстановку
     public void showBoard() {
         for (int i = 0; i < N; i++) {
             String str = "";
