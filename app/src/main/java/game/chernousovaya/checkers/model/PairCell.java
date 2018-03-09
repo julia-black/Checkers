@@ -29,4 +29,12 @@ public class PairCell {
     public void setmEndCell(Cell mEndCell) {
         this.mEndCell = mEndCell;
     }
+
+    @Override
+    public String toString() {
+        return "PairCell{" +
+                "mBegCell=" + mBegCell +
+                ", mEndCell=" + mEndCell +
+                '}';
+    }
 }

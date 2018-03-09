@@ -6,13 +6,15 @@
     android:orientation="vertical">
 
     <Button
-        android:id="@+id/startButton"
+        android:id="@+id/button_start"
+        android:padding="20dp"
+        android:background="@android:color/white"
+        android:scaleType="fitCenter"
         android:layout_width="280dp"
-        android:layout_height="120dp"
+        android:layout_height="80dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="142dp"
-        android:background="@drawable/start_but_down"
-        android:scaleType="fitCenter" />
+        android:layout_marginBottom="160dp"
+        android:text = "Начать"/>
 
 </RelativeLayout>

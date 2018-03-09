@@ -26,6 +26,9 @@
         <activity android:name=".controller.activities.GameActivity"
             android:screenOrientation="portrait">
         </activity>
+        <activity android:name=".controller.activities.LevelActivity"
+            android:screenOrientation="portrait">
+        </activity>
     </application>
 
 </manifest>

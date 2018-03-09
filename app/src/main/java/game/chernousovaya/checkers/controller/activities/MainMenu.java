@@ -15,26 +15,16 @@ public class MainMenu extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
 
-        final Button startButton = (Button) findViewById(R.id.startButton);
+        final Button startButton = (Button) findViewById(R.id.button_start);
         startButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
-                startButton.setBackgroundResource(R.drawable.start_but_push);
-                Intent intent = new Intent(MainMenu.this, GameActivity.class);
+                Intent intent = new Intent(MainMenu.this, LevelActivity.class);
                 startActivity(intent);
             }
         });
 
     }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        final Button startButton = (Button) findViewById(R.id.startButton);
-        startButton.setBackgroundResource(R.drawable.start_but_down);
-
-    }
-
 
 }
