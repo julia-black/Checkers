@@ -41,7 +41,7 @@ public class LevelActivity extends AppCompatActivity {
             }
         });
 
-       twoPlayersButton.setOnClickListener(new View.OnClickListener() {
+        twoPlayersButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(LevelActivity.this, GameActivity.class);

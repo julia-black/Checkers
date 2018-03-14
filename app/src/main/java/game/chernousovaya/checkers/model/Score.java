@@ -2,39 +2,42 @@ package game.chernousovaya.checkers.model;
 
 
 public class Score {
-    int scoreWhite;
-    int scoreBlack;
+    int mScoreWhite;
+    int mScoreBlack;
 
     public Score() {
-        scoreWhite = 0;
-        scoreBlack = 0;
+        this.mScoreBlack = 0;
+        this.mScoreWhite = 0;
     }
 
+    public Score(int mScoreWhite, int mScoreBlack) {
+        this.mScoreWhite = mScoreWhite;
+        this.mScoreBlack = mScoreBlack;
+    }
 
+    public int getmScoreWhite() {
+        return mScoreWhite;
+    }
+
+    public void setmScoreWhite(int mScoreWhite) {
+        this.mScoreWhite = mScoreWhite;
+    }
+
+    public int getmScoreBlack() {
+        return mScoreBlack;
+    }
+
+    public void setmScoreBlack(int mScoreBlack) {
+        this.mScoreBlack = mScoreBlack;
+    }
 
     public void incScoreWhite(int value) { //увеличить счет на value
-        scoreWhite += value;
+        mScoreWhite += value;
 
     }
 
     public void incScoreBlack(int value) {
-        scoreBlack += value;
+        mScoreBlack += value;
 
-    }
-
-    public int getScoreWhite() {
-        return scoreWhite;
-    }
-
-    public void setScoreWhite(int scoreWhite) {
-        this.scoreWhite = scoreWhite;
-    }
-
-    public int getScoreBlack() {
-        return scoreBlack;
-    }
-
-    public void setScoreBlack(int scoreBlack) {
-        this.scoreBlack = scoreBlack;
     }
 }

@@ -4,8 +4,7 @@ public class Move {
     Cell mBegCell;
     Cell mEndCell;
     int mScoreEnemy;
-
-
+    
     public int getmScoreEnemy() {
         return mScoreEnemy;
     }
