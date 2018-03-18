@@ -16,7 +16,7 @@ public class Board {
     int[][] arr = new int[N][N];
 
     //0 - пусто
-    //3- белая клетка, на нее нельзя ходить
+    //3 - белая клетка, на нее нельзя ходить
     //2 - белая шашка (компьютера)
     //1 - черная шашка (игрока)
 
@@ -64,7 +64,7 @@ public class Board {
                 Log.i(LOG_TAG, "!!");
                 if (isValidMove(begI, begJ, i, j, checker) != 0) {
 
-                    if(isValidMove(begI, begJ,i,j,checker) == 1) {
+                    if (isValidMove(begI, begJ, i, j, checker) == 1) {
                         Log.i(LOG_TAG, "Обнуляется - " + begI + "," + begJ);
                         setCell(i, j, checker);
                         setCell(begI, begJ, 0);
@@ -73,7 +73,7 @@ public class Board {
                     //если со взятием
                     else {
                         Log.i(LOG_TAG, "Обнуляется - " + begI + "," + begJ);
-                        capture(begI,begJ,i,j,checker);
+                        capture(begI, begJ, i, j, checker);
                         setCell(i, j, checker);
                         setCell(begI, begJ, 0);
                         return true;
@@ -107,7 +107,7 @@ public class Board {
         if (arr[begI][begJ] != 3 && arr[i][j] != 3) {
             //  Log.i(LOG_TAG, begI + " " + begJ + " " + i + " " + j);
             if (checker == COLOR_ENEMY) { //если ходят белые
-                Log.i(LOG_TAG, begI + " " + begJ + " " + i + " " + j);
+                //  Log.i(LOG_TAG, begI + " " + begJ + " " + i + " " + j);
                 //если они идут без взятия
                 if (begI < 8 && ((i == begI + 1) && (begJ < 8 && (j == begJ + 1) || (begJ > 0 && (j == begJ - 1))))) {
                     return 1;
@@ -167,8 +167,45 @@ public class Board {
         }
     }
 
+    public boolean isEndOfGame(Context context, int countOfPlayers) {
+        Toast toast;
+        if (score.getmScoreWhite() == 12) {
+            if (countOfPlayers == 1) {
+                toast = Toast.makeText(context,
+                        "К сожалению, Вы проиграли.",
+                        Toast.LENGTH_SHORT);
+            } else {
+                toast = Toast.makeText(context,
+                        "Победа за игроком №2! Поздравляем!",
+                        Toast.LENGTH_SHORT);
+            }
+            toast.show();
+            return true;
+        } else if (score.getmScoreBlack() == 12) {
+            if (countOfPlayers == 1) {
+                toast = Toast.makeText(context,
+                        "Поздравляем! Вы победили!",
+                        Toast.LENGTH_SHORT);
+            } else {
+                toast = Toast.makeText(context,
+                        "Победа за игроком №1! Поздравляем!",
+                        Toast.LENGTH_SHORT);
+            }
+            toast.show();
+            return true;
+        }
+        return false;
+    }
+
     //отобразить в лог расстановку
     public void showBoard() {
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+
+
+            }
+
+        }
         for (int i = 0; i < N; i++) {
             String str = "";
             for (int j = 0; j < N; j++) {

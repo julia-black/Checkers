@@ -17,6 +17,8 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import game.chernousovaya.checkers.R;
 import game.chernousovaya.checkers.model.Board;
@@ -45,8 +47,10 @@ public class GameActivity extends AppCompatActivity {
     private int mDeepScoreEnemy = 0;
     private int mDeepRecur = 0;
     private List<Move> moves = new ArrayList<>();
-    // private PairCell mDeepBestPairCell = new PairCell();
     private Move mDeepBestMove = new Move();
+
+    private boolean isPlayersMoved = false;
+    private boolean isTimerStoped = false;
 
     private List<PairCell> mandatoryMoves = new ArrayList<>(); //обязательные ходы
     private View.OnClickListener onClickListener = new View.OnClickListener() {
@@ -76,11 +80,11 @@ public class GameActivity extends AppCompatActivity {
         Toast toast;
         if (countOfPlayers == 1) {
             toast = Toast.makeText(getApplicationContext(),
-                    "Ваш ход",
+                    "Ваш ход (Вы играете за черные)",
                     Toast.LENGTH_SHORT);
         } else {
             toast = Toast.makeText(getApplicationContext(),
-                    "Ход игрока №1",
+                    "Первым ходит игрок №1 (Черные)",
                     Toast.LENGTH_SHORT);
         }
         toast.show();
@@ -115,11 +119,39 @@ public class GameActivity extends AppCompatActivity {
                     final int finalI = i;
                     final int finalJ = j;
 
-                    imageView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            if (countOfPlayers == 1) {
-                                if (mBoard.getCell(finalI, finalJ) == COLOR_PLAYER)//если это шашка игрока №1
+                    if (!mBoard.isEndOfGame(getApplicationContext(), countOfPlayers)) {
+                        imageView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if (countOfPlayers == 1) {
+                                    if (mBoard.getCell(finalI, finalJ) == COLOR_PLAYER)//если это шашка игрока №1
+                                    {
+                                        if (isChooseCheck) { //если она уже была выбрана и игрок хочет изменить выбор своей шашки
+                                            mChooseCell.setX(finalI);
+                                            mChooseCell.setY(finalJ);
+                                            renderBoard();
+                                        }
+                                        imageView.setBackgroundColor(Color.GREEN);
+                                        isChooseCheck = true;
+                                        mChooseCell.setX(finalI);
+                                        mChooseCell.setY(finalJ);
+                                    } else {
+                                        if (isChooseCheck) { //если игрок уже выбрал шашку и хочет сделать ход
+
+                                            if (mBoard.moveChecker(mChooseCell.getX(), mChooseCell.getY(), finalI, finalJ, COLOR_PLAYER, getApplicationContext())) {
+                                                Log.i(LOG_TAG, "Move to: " + mChooseCell.getX() + ", " + mChooseCell.getY() + "-> " + Integer.toString(finalI) + "," + Integer.toString(finalJ));
+                                                isPlayersMoved = true;
+                                                renderBoard();
+                                                moveEnemy();
+                                            }
+                                        } else {
+                                            Toast toast = Toast.makeText(getApplicationContext(),
+                                                    "Сначала выберите шашку, которой хотите совершить ход",
+                                                    Toast.LENGTH_SHORT);
+                                            toast.show();
+                                        }
+                                    }
+                                } else if (mBoard.getCell(finalI, finalJ) == currentPlayer)//если это шашка текущего игрока
                                 {
                                     if (isChooseCheck) { //если она уже была выбрана и игрок хочет изменить выбор своей шашки
                                         mChooseCell.setX(finalI);
@@ -132,33 +164,27 @@ public class GameActivity extends AppCompatActivity {
                                     mChooseCell.setY(finalJ);
                                 } else {
                                     if (isChooseCheck) { //если игрок уже выбрал шашку и хочет сделать ход
-                                        if (mBoard.moveChecker(mChooseCell.getX(), mChooseCell.getY(), finalI, finalJ, COLOR_PLAYER, getApplicationContext())) {
-                                            Log.i(LOG_TAG, "Move to: " + mChooseCell.getX() + ", " + mChooseCell.getY() + "-> " + Integer.toString(finalI) + "," + Integer.toString(finalJ));
+                                        if (mBoard.moveChecker(mChooseCell.getX(), mChooseCell.getY(), finalI, finalJ, currentPlayer, getApplicationContext())) {
+                                            Log.i(LOG_TAG, "Player:" + currentPlayer + " Move to: " + mChooseCell.getX() + ", " + mChooseCell.getY() + "-> " + Integer.toString(finalI) + "," + Integer.toString(finalJ));
                                             renderBoard();
-
-                                          // PairCell newCell = movementEnemy();
-
-                                          // mBoard.moveChecker(newCell.getmBegCell().getX(), newCell.getmBegCell().getY(), newCell.getmEndCell().getX(), newCell.getmEndCell().getY(), COLOR_ENEMY, getApplicationContext());
-                                          // numberMove++;
-                                          // Log.i(LOG_TAG, "Number move: " + numberMove);
-
-                                          // renderBoard();
-                                          // Toast toast = Toast.makeText(getApplicationContext(),
-                                          //         "Ваш ход",
-                                          //         Toast.LENGTH_SHORT);
-                                          // toast.show();
-                                          // Ход белых
-                                            PairCell newCell = movementEnemy();
-
-                                            mBoard.moveChecker(newCell.getmBegCell().getX(), newCell.getmBegCell().getY(), newCell.getmEndCell().getX(), newCell.getmEndCell().getY(), COLOR_ENEMY, getApplicationContext());
+                                            if (currentPlayer == 1) {
+                                                currentPlayer = 2;
+                                            } else {
+                                                currentPlayer = 1;
+                                            }
                                             numberMove++;
-                                            Log.i(LOG_TAG, "Number move: " + numberMove);
-                                            renderBoard();
 
-                                            Toast toast = Toast.makeText(getApplicationContext(),
-                                                    "Ваш ход",
-                                                    Toast.LENGTH_SHORT);
-                                            toast.show();
+                                          // Toast toast;
+                                          // if (currentPlayer == 2) {
+                                          //     toast = Toast.makeText(getApplicationContext(),
+                                          //             "Ход игрока №2",
+                                          //             Toast.LENGTH_SHORT);
+                                          // } else {
+                                          //     toast = Toast.makeText(getApplicationContext(),
+                                          //             "Ход игрока №1",
+                                          //             Toast.LENGTH_SHORT);
+                                          // }
+                                          // toast.show();
                                         }
                                     } else {
                                         Toast toast = Toast.makeText(getApplicationContext(),
@@ -167,59 +193,9 @@ public class GameActivity extends AppCompatActivity {
                                         toast.show();
                                     }
                                 }
-                            } else if (mBoard.getCell(finalI, finalJ) == currentPlayer)//если это шашка текущего игрока
-                            {
-                                if (isChooseCheck) { //если она уже была выбрана и игрок хочет изменить выбор своей шашки
-                                    mChooseCell.setX(finalI);
-                                    mChooseCell.setY(finalJ);
-                                    renderBoard();
-                                }
-                                imageView.setBackgroundColor(Color.GREEN);
-                                isChooseCheck = true;
-                                mChooseCell.setX(finalI);
-                                mChooseCell.setY(finalJ);
-                            } else {
-                                if (isChooseCheck) { //если игрок уже выбрал шашку и хочет сделать ход
-                                    if (mBoard.moveChecker(mChooseCell.getX(), mChooseCell.getY(), finalI, finalJ, currentPlayer, getApplicationContext())) {
-                                        Log.i(LOG_TAG, "Player:" + currentPlayer + " Move to: " + mChooseCell.getX() + ", " + mChooseCell.getY() + "-> " + Integer.toString(finalI) + "," + Integer.toString(finalJ));
-                                        renderBoard();
-                                        if (currentPlayer == 1) {
-                                            currentPlayer = 2;
-                                        } else {
-                                            currentPlayer = 1;
-                                        }
-                                        numberMove++;
-                                        //Ход белых
-                                        //   PairCell newCell = movementEnemy();
-
-                                        //   mBoard.moveChecker(newCell.getmBegCell().getX(), newCell.getmBegCell().getY(), newCell.getmEndCell().getX(), newCell.getmEndCell().getY(), COLOR_ENEMY, getApplicationContext());
-                                        //   numberMove++;
-                                        //   Log.i(LOG_TAG, "Number move: " + numberMove);
-                                        //   renderBoard();
-                                        // mBoard.showBoard();
-                                        Toast toast;
-                                        if (currentPlayer == 2) {
-                                            toast = Toast.makeText(getApplicationContext(),
-                                                    "Ход игрока №2",
-                                                    Toast.LENGTH_SHORT);
-                                        } else {
-                                            toast = Toast.makeText(getApplicationContext(),
-                                                    "Ход игрока №1",
-                                                    Toast.LENGTH_SHORT);
-                                        }
-                                        toast.show();
-                                    }
-                                } else {
-                                    Toast toast = Toast.makeText(getApplicationContext(),
-                                            "Сначала выберите шашку, которой хотите совершить ход",
-                                            Toast.LENGTH_SHORT);
-                                    toast.show();
-                                }
-
-
                             }
-                        }
-                    });
+                        });
+                    }
                 }
                 if (i == mChooseCell.getX() && j == mChooseCell.getY()) {
                     imageView.setBackgroundColor(Color.GREEN);
@@ -230,21 +206,53 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
+    private void moveEnemy() {
+        isTimerStoped = false;
+        if (isPlayersMoved) {
+            final Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (isPlayersMoved) {
+                                try {
+                                    Thread.sleep(500);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                                isTimerStoped = true;
+                                if (isTimerStoped) {
+                                    Log.i(LOG_TAG, isTimerStoped + "");
+                                    PairCell newCell = calculateBestMove();
+                                    mBoard.moveChecker(newCell.getmBegCell().getX(), newCell.getmBegCell().getY(), newCell.getmEndCell().getX(), newCell.getmEndCell().getY(), COLOR_ENEMY, getApplicationContext());
+                                    numberMove++;
+                                    Log.i(LOG_TAG, "Number move: " + numberMove);
+                                    Toast toast = Toast.makeText(getApplicationContext(),
+                                            "Ваш ход",
+                                            Toast.LENGTH_SHORT);
+                                    toast.show();
+                                    renderBoard();
+                                    isPlayersMoved = false;
+                                    isTimerStoped = false;
+                                }
+                            }
+                        }
+                    });
+                }
+            }, 0, 1000);
+        }
+    }
+
     private void updateScore() {
+        Log.i(LOG_TAG, "update score");
         TextView scoreView = (TextView) findViewById(R.id.score);
         scoreView.setText(mBoard.getScore().getmScoreBlack() + ":" + mBoard.getScore().getmScoreWhite());
     }
 
     private boolean isBlackCell(int i, int j) {
         return ((i % 2 == 0 && j % 2 != 0) || (i % 2 != 0 && j % 2 == 0));
-    }
-
-    //Ход противника
-    private PairCell movementEnemy() {
-
-        Log.i(LOG_TAG, "movement white");
-
-        return calculateBestMove();
     }
 
     private boolean winning(int colorPlayer) {
@@ -275,7 +283,7 @@ public class GameActivity extends AppCompatActivity {
                 for (int j = 0; j < COLUMNS; j++) {
                     if (board.getCell(i, j) == 0) {
                         int flag = board.isValidMove(begI, begJ, i, j, colorPlayer);
-                        Log.i(LOG_TAG, "Flag = " + flag);
+                        // Log.i(LOG_TAG, "Flag = " + flag);
                         if (flag == 1) {
                             //if()
                             availCells.add(new Cell(i, j));
@@ -388,6 +396,14 @@ public class GameActivity extends AppCompatActivity {
         return bestMove;
     }
 
+    private boolean isBadMove(int i, int j) {
+        if(i < 7) {
+            if ((j < 7 && mBoard.getArr()[i + 1][j + 1] == COLOR_PLAYER) || (j > 0 && mBoard.getArr()[i + 1][j - 1] == COLOR_PLAYER))
+                return true;
+        }
+        return false;
+    }
+
     private PairCell calculateBestMove() {
         if (level.equals("easy") && countOfPlayers == 1) {
             List<PairCell> pairCells = new ArrayList<>();
@@ -409,7 +425,7 @@ public class GameActivity extends AppCompatActivity {
                 }
             }
             Log.i(LOG_TAG, "mandatory moves " + mandatoryMoves.toString());
-            Log.i(LOG_TAG, "paircells " + pairCells.toString());
+            Log.i(LOG_TAG, "pairCells " + pairCells.toString());
             if (mandatoryMoves.size() > 0) {
                 pairCells.clear();
                 pairCells.addAll(mandatoryMoves);
@@ -417,13 +433,26 @@ public class GameActivity extends AppCompatActivity {
             Random random = new Random();
             Log.i(LOG_TAG, pairCells.toString());
             PairCell pairCell;
+
+            int countOfBadMoves = 0;
             if (pairCells.size() > 1) {
                 pairCell = pairCells.get(random.nextInt(pairCells.size() - 1));
+                for (int i = 0; i < pairCells.size(); i++) {
+                    if(isBadMove(pairCells.get(i).getmEndCell().getX(), pairCells.get(i).getmEndCell().getY())){
+                        countOfBadMoves++;
+                    }
+                }
+                if(countOfBadMoves < pairCells.size()){
+                    while (isBadMove(pairCell.getmEndCell().getX(), pairCell.getmEndCell().getY())){
+                        Log.i(LOG_TAG, pairCell.getmEndCell().getX() + "," + pairCell.getmEndCell().getY() + " is bad move");
+                        pairCell = pairCells.get(random.nextInt(pairCells.size() - 1));
+                    }
+                }
+
             } else {
                 pairCell = pairCells.get(0);
             }
             mandatoryMoves.clear();
-            //   mBoard.capture(pairCell.getmBegCell().getX(), pairCell.getmBegCell().getY(), pairCell.getmEndCell().getX(), pairCell.getmEndCell().getY(), COLOR_PLAYER);
             Log.i(LOG_TAG, pairCell.toString());
             return pairCell;
         } else {
