@@ -33,6 +33,8 @@ public class GameActivity extends AppCompatActivity {
     private static final int COLUMNS = 8;
     private static final int COLOR_ENEMY = 2;
     private static final int COLOR_PLAYER = 1;
+    private static final int COLOR_ENEMY_KING = 4;
+    private static final int COLOR_PLAYER_KING = 5;
 
     private int countOfPlayers = 0;
     private String level = "easy";
@@ -113,6 +115,10 @@ public class GameActivity extends AppCompatActivity {
                         imageView.setImageResource(R.drawable.white);
                     } else if (mBoard.getCell(i, j) == COLOR_PLAYER) {
                         imageView.setImageResource(R.drawable.black);
+                    } else if (mBoard.getCell(i, j) == COLOR_PLAYER_KING) {
+                        imageView.setImageResource(R.drawable.black_king);
+                    } else if (mBoard.getCell(i, j) == COLOR_ENEMY_KING) {
+                        imageView.setImageResource(R.drawable.white_king);
                     } else {
                         imageView.setImageResource(R.drawable.black_cell);
                     }
@@ -124,7 +130,7 @@ public class GameActivity extends AppCompatActivity {
                             @Override
                             public void onClick(View view) {
                                 if (countOfPlayers == 1) {
-                                    if (mBoard.getCell(finalI, finalJ) == COLOR_PLAYER)//если это шашка игрока №1
+                                    if (mBoard.getCell(finalI, finalJ) == COLOR_PLAYER || mBoard.getCell(finalI, finalJ) == COLOR_PLAYER_KING)//если это шашка игрока №1
                                     {
                                         if (isChooseCheck) { //если она уже была выбрана и игрок хочет изменить выбор своей шашки
                                             mChooseCell.setX(finalI);
@@ -137,8 +143,7 @@ public class GameActivity extends AppCompatActivity {
                                         mChooseCell.setY(finalJ);
                                     } else {
                                         if (isChooseCheck) { //если игрок уже выбрал шашку и хочет сделать ход
-
-                                            if (mBoard.moveChecker(mChooseCell.getX(), mChooseCell.getY(), finalI, finalJ, COLOR_PLAYER, getApplicationContext())) {
+                                            if (mBoard.moveChecker(mChooseCell.getX(), mChooseCell.getY(), finalI, finalJ, mBoard.getCell(mChooseCell.getX(), mChooseCell.getY()), getApplicationContext())) {
                                                 Log.i(LOG_TAG, "Move to: " + mChooseCell.getX() + ", " + mChooseCell.getY() + "-> " + Integer.toString(finalI) + "," + Integer.toString(finalJ));
                                                 isPlayersMoved = true;
                                                 renderBoard();
@@ -151,7 +156,10 @@ public class GameActivity extends AppCompatActivity {
                                             toast.show();
                                         }
                                     }
-                                } else if (mBoard.getCell(finalI, finalJ) == currentPlayer)//если это шашка текущего игрока
+                                }
+                                //если это шашка текущего игрока
+                                else if ( (currentPlayer == 1 && (mBoard.getCell(finalI, finalJ) == COLOR_PLAYER|| mBoard.getCell(finalI,finalJ) == COLOR_PLAYER_KING))
+                                        || (currentPlayer == 2 && (mBoard.getCell(finalI, finalJ) == COLOR_ENEMY || mBoard.getCell(finalI,finalJ) == COLOR_ENEMY_KING)))
                                 {
                                     if (isChooseCheck) { //если она уже была выбрана и игрок хочет изменить выбор своей шашки
                                         mChooseCell.setX(finalI);
@@ -164,7 +172,7 @@ public class GameActivity extends AppCompatActivity {
                                     mChooseCell.setY(finalJ);
                                 } else {
                                     if (isChooseCheck) { //если игрок уже выбрал шашку и хочет сделать ход
-                                        if (mBoard.moveChecker(mChooseCell.getX(), mChooseCell.getY(), finalI, finalJ, currentPlayer, getApplicationContext())) {
+                                        if (mBoard.moveChecker(mChooseCell.getX(), mChooseCell.getY(), finalI, finalJ, mBoard.getCell(mChooseCell.getX(), mChooseCell.getY()), getApplicationContext())) {
                                             Log.i(LOG_TAG, "Player:" + currentPlayer + " Move to: " + mChooseCell.getX() + ", " + mChooseCell.getY() + "-> " + Integer.toString(finalI) + "," + Integer.toString(finalJ));
                                             renderBoard();
                                             if (currentPlayer == 1) {
@@ -173,18 +181,6 @@ public class GameActivity extends AppCompatActivity {
                                                 currentPlayer = 1;
                                             }
                                             numberMove++;
-
-                                          // Toast toast;
-                                          // if (currentPlayer == 2) {
-                                          //     toast = Toast.makeText(getApplicationContext(),
-                                          //             "Ход игрока №2",
-                                          //             Toast.LENGTH_SHORT);
-                                          // } else {
-                                          //     toast = Toast.makeText(getApplicationContext(),
-                                          //             "Ход игрока №1",
-                                          //             Toast.LENGTH_SHORT);
-                                          // }
-                                          // toast.show();
                                         }
                                     } else {
                                         Toast toast = Toast.makeText(getApplicationContext(),
@@ -224,9 +220,9 @@ public class GameActivity extends AppCompatActivity {
                                 }
                                 isTimerStoped = true;
                                 if (isTimerStoped) {
-                                    Log.i(LOG_TAG, isTimerStoped + "");
                                     PairCell newCell = calculateBestMove();
-                                    mBoard.moveChecker(newCell.getmBegCell().getX(), newCell.getmBegCell().getY(), newCell.getmEndCell().getX(), newCell.getmEndCell().getY(), COLOR_ENEMY, getApplicationContext());
+
+                                    mBoard.moveChecker(newCell.getmBegCell().getX(), newCell.getmBegCell().getY(), newCell.getmEndCell().getX(), newCell.getmEndCell().getY(), mBoard.getCell(newCell.getmBegCell().getX(), newCell.getmBegCell().getY()), getApplicationContext());
                                     numberMove++;
                                     Log.i(LOG_TAG, "Number move: " + numberMove);
                                     Toast toast = Toast.makeText(getApplicationContext(),
@@ -274,18 +270,14 @@ public class GameActivity extends AppCompatActivity {
 
     //Получаем доступные клетки, куда мы можем пойти
     private List<Cell> getAvailCellsInBoard(Board board, int begI, int begJ, int colorPlayer) {
-        // Log.i(LOG_TAG, "Reboard in alg getAvailCells:");
-        //  board.showBoard();
+
         List<Cell> availCells = new ArrayList<>();
-        //   Log.i(LOG_TAG, "beg:" + begI + "," + begJ + "; colorPlayer: " + colorPlayer);
         if (board.getCell(begI, begJ) == colorPlayer) {
             for (int i = 0; i < ROWS; i++) {
                 for (int j = 0; j < COLUMNS; j++) {
                     if (board.getCell(i, j) == 0) {
                         int flag = board.isValidMove(begI, begJ, i, j, colorPlayer);
-                        // Log.i(LOG_TAG, "Flag = " + flag);
                         if (flag == 1) {
-                            //if()
                             availCells.add(new Cell(i, j));
                         } else if (flag == 2) {
                             Log.i(LOG_TAG, "!!! " + availCells.toString());
@@ -397,7 +389,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private boolean isBadMove(int i, int j) {
-        if(i < 7) {
+        if (i < 7) {
             if ((j < 7 && mBoard.getArr()[i + 1][j + 1] == COLOR_PLAYER) || (j > 0 && mBoard.getArr()[i + 1][j - 1] == COLOR_PLAYER))
                 return true;
         }
@@ -412,9 +404,9 @@ public class GameActivity extends AppCompatActivity {
             for (int i = 0; i < ROWS; i++) {
                 for (int j = 0; j < COLUMNS; j++) {
                     //если это шашка противника
-                    if (mBoard.getCell(i, j) == COLOR_ENEMY) {
+                    if (mBoard.getCell(i, j) == COLOR_ENEMY || mBoard.getCell(i, j) == COLOR_ENEMY_KING) {
                         //смотрим доступные ходы для этой шашки
-                        List<Cell> cells = getAvailCellsInBoard(mBoard, i, j, COLOR_ENEMY);
+                        List<Cell> cells = getAvailCellsInBoard(mBoard, i, j, mBoard.getCell(i, j));
                         if (cells.size() > 0) {
                             //Добавляем все доступные ходы в массив ходов
                             for (int k = 0; k < cells.size(); k++) {
@@ -438,12 +430,12 @@ public class GameActivity extends AppCompatActivity {
             if (pairCells.size() > 1) {
                 pairCell = pairCells.get(random.nextInt(pairCells.size() - 1));
                 for (int i = 0; i < pairCells.size(); i++) {
-                    if(isBadMove(pairCells.get(i).getmEndCell().getX(), pairCells.get(i).getmEndCell().getY())){
+                    if (isBadMove(pairCells.get(i).getmEndCell().getX(), pairCells.get(i).getmEndCell().getY())) {
                         countOfBadMoves++;
                     }
                 }
-                if(countOfBadMoves < pairCells.size()){
-                    while (isBadMove(pairCell.getmEndCell().getX(), pairCell.getmEndCell().getY())){
+                if (countOfBadMoves < pairCells.size()) {
+                    while (isBadMove(pairCell.getmEndCell().getX(), pairCell.getmEndCell().getY())) {
                         Log.i(LOG_TAG, pairCell.getmEndCell().getX() + "," + pairCell.getmEndCell().getY() + " is bad move");
                         pairCell = pairCells.get(random.nextInt(pairCells.size() - 1));
                     }
@@ -460,10 +452,10 @@ public class GameActivity extends AppCompatActivity {
             for (int i = 0; i < ROWS; i++) {
                 for (int j = 0; j < COLUMNS; j++) {
                     //выбераем все шашки врага и проверяем для каждой шашки best move
-                    if (mBoard.getCell(i, j) == COLOR_ENEMY) {
+                    if (mBoard.getCell(i, j) == COLOR_ENEMY || mBoard.getCell(i, j) == COLOR_ENEMY_KING) {
                         Log.i(LOG_TAG, "For check " + i + ", " + j + ":");
                         mDeepRecur = 0;
-                        Move move = algMiniMax(mBoard, i, j, COLOR_ENEMY);
+                        Move move = algMiniMax(mBoard, i, j, mBoard.getCell(i, j));
                         if (bestMove == null) {
                             bestMove = move;
                         } else if (bestMove.getmScoreEnemy() > bestMove.getmScoreEnemy()) {
