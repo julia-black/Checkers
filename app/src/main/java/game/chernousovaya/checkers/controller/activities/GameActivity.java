@@ -53,6 +53,7 @@ public class GameActivity extends AppCompatActivity {
 
     private boolean isPlayersMoved = false;
     private boolean isTimerStoped = false;
+    private TextView messageView;
 
     private List<PairCell> mandatoryMoves = new ArrayList<>(); //обязательные ходы
     private View.OnClickListener onClickListener = new View.OnClickListener() {
@@ -79,17 +80,13 @@ public class GameActivity extends AppCompatActivity {
         renderBoard();
 
         numberMove = 0;
-        Toast toast;
+        TextView messageView = (TextView) findViewById(R.id.message);
+
         if (countOfPlayers == 1) {
-            toast = Toast.makeText(getApplicationContext(),
-                    "Ваш ход (Вы играете за черные)",
-                    Toast.LENGTH_SHORT);
+            messageView.setText(" Ваш ход (Вы играете за черные)");
         } else {
-            toast = Toast.makeText(getApplicationContext(),
-                    "Первым ходит игрок №1 (Черные)",
-                    Toast.LENGTH_SHORT);
-        }
-        toast.show();
+            messageView.setText(" Первым ходит игрок №1 (Черные)");
+        };
     }
 
     private void renderBoard() {
@@ -177,8 +174,12 @@ public class GameActivity extends AppCompatActivity {
                                             renderBoard();
                                             if (currentPlayer == 1) {
                                                 currentPlayer = 2;
+                                                messageView = (TextView) findViewById(R.id.message);
+                                                messageView.setText("Ход игрока №2 (Белые)");
                                             } else {
                                                 currentPlayer = 1;
+                                                messageView = (TextView) findViewById(R.id.message);
+                                                messageView.setText("Ход игрока №1 (Черные)");
                                             }
                                             numberMove++;
                                         }
@@ -203,6 +204,8 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void moveEnemy() {
+        messageView = (TextView) findViewById(R.id.message);
+        messageView.setText("Ход противника");
         isTimerStoped = false;
         if (isPlayersMoved) {
             final Timer timer = new Timer();
@@ -221,14 +224,11 @@ public class GameActivity extends AppCompatActivity {
                                 isTimerStoped = true;
                                 if (isTimerStoped) {
                                     PairCell newCell = calculateBestMove();
-
                                     mBoard.moveChecker(newCell.getmBegCell().getX(), newCell.getmBegCell().getY(), newCell.getmEndCell().getX(), newCell.getmEndCell().getY(), mBoard.getCell(newCell.getmBegCell().getX(), newCell.getmBegCell().getY()), getApplicationContext());
                                     numberMove++;
                                     Log.i(LOG_TAG, "Number move: " + numberMove);
-                                    Toast toast = Toast.makeText(getApplicationContext(),
-                                            "Ваш ход",
-                                            Toast.LENGTH_SHORT);
-                                    toast.show();
+                                    messageView = (TextView) findViewById(R.id.message);
+                                    messageView.setText("Ваш ход");
                                     renderBoard();
                                     isPlayersMoved = false;
                                     isTimerStoped = false;

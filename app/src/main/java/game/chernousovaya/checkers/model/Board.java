@@ -5,6 +5,8 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
+import game.chernousovaya.checkers.controller.activities.GameActivity;
+
 public class Board {
     private static final String LOG_TAG = Board.class.getSimpleName();
     private static final int COLOR_ENEMY = 2;
@@ -15,6 +17,7 @@ public class Board {
     private Score score;
 
     int[][] arr = new int[N][N];
+    int temp = 0;
 
     //0 - пусто
     //3 - белая клетка, на нее нельзя ходить
@@ -24,6 +27,7 @@ public class Board {
     // 5 - дамка черных
 
     public Board() {
+        temp = 0;
         score = new Score();
         //первоначальная расстановка шашек
         for (int i = 0; i < N; i++) {
@@ -120,7 +124,7 @@ public class Board {
                     return 1;
                 }
                 //если идут со взятием
-                else if ((i == begI + 2) || checker == COLOR_ENEMY_KING && i == begI - 2) {
+                else if ((i == begI + 2) || (checker == COLOR_ENEMY_KING && i == begI - 2)) {
                     //если идет влево и там стоит вражеская белая шашка
                     if (checker == COLOR_ENEMY) {
                         if (begI < 7 && begJ < 7 && j == begJ + 2 && (arr[begI + 1][begJ + 1] == COLOR_PLAYER || arr[begI + 1][begJ + 1] == COLOR_PLAYER_KING)) {
@@ -132,7 +136,7 @@ public class Board {
                     } else if (checker == COLOR_ENEMY_KING) {
                         if (j == begJ + 2 && (arr[begI - 1][begJ + 1] == COLOR_PLAYER || arr[begI - 1][begJ + 1] == COLOR_PLAYER_KING)) {
                             return 2;
-                        } else if (begI < 7 && begJ > 1)
+                        } else if (begJ > 1)
                             if (j == begJ - 2 && (arr[begI - 1][begJ - 1] == COLOR_PLAYER || arr[begI - 1][begJ - 1] == COLOR_PLAYER_KING)) {
                                 return 2;
                             }
@@ -180,12 +184,12 @@ public class Board {
             }
 
         if (arr[begI][begJ] == COLOR_ENEMY_KING) {
-             if(j == begJ - 2 &&( arr[begI - 1][begJ + 1] == COLOR_PLAYER || arr[begI - 1][begJ + 1] == COLOR_PLAYER_KING)){
-                 captureEnemyChecker(begI - 1, begJ + 1, arr[begI - 1][begJ + 1]);
-             }
-             else if(j == begJ + 2 && (arr[begI - 1][begJ - 1] == COLOR_PLAYER || arr[begI - 1][begJ - 1] == COLOR_PLAYER_KING) ){
-                 captureEnemyChecker(begI - 1, begJ - 1, arr[begI - 1][begJ - 1]);
-             }
+            if(j == begJ - 2 &&( arr[begI - 1][begJ - 1] == COLOR_PLAYER || arr[begI - 1][begJ - 1] == COLOR_PLAYER_KING)){
+                captureEnemyChecker(begI - 1, begJ - 1, arr[begI - 1][begJ - 1]);
+            }
+            else if(j == begJ + 2 && (arr[begI - 1][begJ + 1] == COLOR_PLAYER || arr[begI - 1][begJ + 1] == COLOR_PLAYER_KING) ){
+                captureEnemyChecker(begI - 1, begJ + 1, arr[begI - 1][begJ + 1]);
+            }
         }
     }
 
@@ -201,29 +205,37 @@ public class Board {
 
     public boolean isEndOfGame(Context context, int countOfPlayers) {
         Toast toast;
+
         if (score.getmScoreWhite() == 12) {
-            if (countOfPlayers == 1) {
+            if (countOfPlayers == 1 && temp == 0) {
+                temp = 1;
                 toast = Toast.makeText(context,
                         "К сожалению, Вы проиграли.",
                         Toast.LENGTH_SHORT);
+                toast.show();
             } else {
-                toast = Toast.makeText(context,
-                        "Победа за игроком №2! Поздравляем!",
-                        Toast.LENGTH_SHORT);
+                if(temp == 0) {
+                    toast = Toast.makeText(context,
+                            "Победа за игроком №2! Поздравляем!",
+                            Toast.LENGTH_SHORT);
+                    toast.show();
+                }
             }
-            toast.show();
             return true;
         } else if (score.getmScoreBlack() == 12) {
-            if (countOfPlayers == 1) {
+            if (countOfPlayers ==  1 && temp == 0) {
                 toast = Toast.makeText(context,
                         "Поздравляем! Вы победили!",
                         Toast.LENGTH_SHORT);
+                toast.show();
             } else {
-                toast = Toast.makeText(context,
-                        "Победа за игроком №1! Поздравляем!",
-                        Toast.LENGTH_SHORT);
+                if(temp == 0) {
+                    toast = Toast.makeText(context,
+                            "Победа за игроком №1! Поздравляем!",
+                            Toast.LENGTH_SHORT);
+                    toast.show();
+                }
             }
-            toast.show();
             return true;
         }
         return false;
