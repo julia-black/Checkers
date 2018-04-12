@@ -14,6 +14,22 @@ public class PairCell {
     public PairCell() {
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
+
+        PairCell pairCell = (PairCell) obj;
+        return this.mBegCell.getX() == pairCell.mBegCell.getX()
+                && this.mBegCell.getY() == pairCell.mBegCell.getY()
+                && this.mEndCell.getX() == pairCell.mEndCell.getX()
+                && this.mEndCell.getY() == pairCell.mEndCell.getY();
+    }
+
     public Cell getmBegCell() {
         return mBegCell;
     }
