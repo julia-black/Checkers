@@ -4,7 +4,7 @@ public class Move {
     Cell mBegCell;
     Cell mEndCell;
     int mScoreEnemy;
-    
+
     public int getmScoreEnemy() {
         return mScoreEnemy;
     }
@@ -40,7 +40,6 @@ public class Move {
     public void setmScoreEnemy(int mScoreEnemy) {
         this.mScoreEnemy = mScoreEnemy;
     }
-
 
     public Move(Cell mBegCell, Cell mEndCell, int mScoreEnemy) {
         this.mBegCell = mBegCell;

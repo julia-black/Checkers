@@ -14,6 +14,11 @@ public class PairCell {
     public PairCell() {
     }
 
+    public PairCell(int x0, int y0, int x1, int y1) {
+        this.mBegCell = new Cell(x0, y0);
+        this.mEndCell = new Cell(x1, y1);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {

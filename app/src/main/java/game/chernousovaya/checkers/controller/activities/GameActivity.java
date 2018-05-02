@@ -43,6 +43,7 @@ public class GameActivity extends AppCompatActivity {
     private static int numberMove; //номер хода
 
     private Board mBoard;
+    private Board tempBoard;
     private boolean isChooseCheck = false;
     private Cell mChooseCell;
 
@@ -56,12 +57,18 @@ public class GameActivity extends AppCompatActivity {
     private TextView messageView;
     private boolean endGame = false;
 
-    private List<PairCell> mandatoryMoves = new ArrayList<>(); //обязательные ходы
+    private boolean isResumeMove = false; //признак того, что это продолжение хода, а не новый хлд, т.е. в продолжении игрок должен бить дальше
+
+    private List<PairCell> mandatoryMoves = new ArrayList<>(); //обязательные ходы для одной шашки
+
+    // private List<PairCell> allMandatoryMoves = new ArrayList<>(); //обязательные ходы для всех шашек
+
     private View.OnClickListener onClickListener = new View.OnClickListener() {
         public void onClick(View v) {
             Log.i(LOG_TAG, v.getId() + "");
         }
     };
+
 
     //Первый игрок играет за черные
     @Override
@@ -88,7 +95,6 @@ public class GameActivity extends AppCompatActivity {
         } else {
             messageView.setText(" Первым ходит игрок №1 (Черные)");
         }
-        ;
     }
 
     private void renderBoard() {
@@ -143,12 +149,26 @@ public class GameActivity extends AppCompatActivity {
                                             mChooseCell.setY(finalJ);
                                         } else {
                                             if (isChooseCheck) { //если игрок уже выбрал шашку и хочет сделать ход
-                                                getAvailCellsInBoard(mBoard, mChooseCell.getX(), mChooseCell.getY(), 1);
-                                                if (mBoard.moveChecker(mandatoryMoves, mChooseCell.getX(), mChooseCell.getY(), finalI, finalJ, mBoard.getCell(mChooseCell.getX(), mChooseCell.getY()), getApplicationContext())) {
-                                                    Log.i(LOG_TAG, "Move to: " + mChooseCell.getX() + ", " + mChooseCell.getY() + "-> " + Integer.toString(finalI) + "," + Integer.toString(finalJ));
-                                                    isPlayersMoved = true;
-                                                    renderBoard();
-                                                    moveEnemy();
+
+                                                //надо сделать проверку на то, что если другие шашки могут бить, то выбирать только из них
+                                                List<PairCell> allMandatoryMoves = getAllMandatoryMoves(mBoard, 1);
+                                                //если данных ход содержится в обязательных ходах или обязательных ходов для битья нет, то всё хорошо
+
+                                                if (allMandatoryMoves.contains(new PairCell(mChooseCell.getX(), mChooseCell.getY(), finalI, finalJ)) || allMandatoryMoves.isEmpty()) {
+
+                                                    getAvailCellsInBoard(mBoard, mChooseCell.getX(), mChooseCell.getY(), 1);
+                                                    int withCapture = mBoard.moveChecker(mandatoryMoves, mChooseCell.getX(), mChooseCell.getY(), finalI, finalJ, mBoard.getCell(mChooseCell.getX(), mChooseCell.getY()), getApplicationContext());
+                                                    if (withCapture != 0) {
+                                                        Log.i(LOG_TAG, "Move to: " + mChooseCell.getX() + ", " + mChooseCell.getY() + "-> " + Integer.toString(finalI) + "," + Integer.toString(finalJ));
+                                                        isPlayersMoved = true;
+                                                        renderBoard();
+                                                        moveEnemy();
+                                                    }
+                                                } else {
+                                                    Toast toast = Toast.makeText(getApplicationContext(),
+                                                            "Есть шашки, которыми можно бить, выберите другую шашку",
+                                                            Toast.LENGTH_SHORT);
+                                                    toast.show();
                                                 }
                                             } else {
                                                 Toast toast = Toast.makeText(getApplicationContext(),
@@ -156,6 +176,7 @@ public class GameActivity extends AppCompatActivity {
                                                         Toast.LENGTH_SHORT);
                                                 toast.show();
                                             }
+
                                         }
                                     }
                                     //если это шашка текущего игрока
@@ -172,26 +193,55 @@ public class GameActivity extends AppCompatActivity {
                                         mChooseCell.setY(finalJ);
                                     } else {
                                         if (isChooseCheck) { //если игрок уже выбрал шашку и хочет сделать ход
-                                            getAvailCellsInBoard(mBoard, mChooseCell.getX(), mChooseCell.getY(), currentPlayer);
-                                            if (mBoard.moveChecker(mandatoryMoves, mChooseCell.getX(), mChooseCell.getY(), finalI, finalJ, mBoard.getCell(mChooseCell.getX(), mChooseCell.getY()), getApplicationContext())) {
-                                                Log.i(LOG_TAG, "Player:" + currentPlayer + " Move to: " + mChooseCell.getX() + ", " + mChooseCell.getY() + "-> " + Integer.toString(finalI) + "," + Integer.toString(finalJ));
-                                                renderBoard();
-                                                if (currentPlayer == 1) {
-                                                    currentPlayer = 2;
-                                                    messageView = (TextView) findViewById(R.id.message);
-                                                    if (endGame)
-                                                        messageView.setText("");
-                                                    else
-                                                        messageView.setText("Ход игрока №2 (Белые)");
-                                                } else {
-                                                    currentPlayer = 1;
-                                                    messageView = (TextView) findViewById(R.id.message);
-                                                    if(endGame)
-                                                        messageView.setText("");
-                                                    else
-                                                        messageView.setText("Ход игрока №1 (Черные)");
+
+                                            //если это продолжение хода, то он должен бить все шашки
+
+                                            List<PairCell> allMandatoryMoves = getAllMandatoryMoves(mBoard, currentPlayer);
+                                            if (allMandatoryMoves.contains(new PairCell(mChooseCell.getX(), mChooseCell.getY(), finalI, finalJ)) || allMandatoryMoves.isEmpty()) {
+
+                                                getAvailCellsInBoard(mBoard, mChooseCell.getX(), mChooseCell.getY(), currentPlayer);
+
+                                                int withCapture = mBoard.moveChecker(mandatoryMoves, mChooseCell.getX(), mChooseCell.getY(), finalI, finalJ,
+                                                        mBoard.getCell(mChooseCell.getX(), mChooseCell.getY()), getApplicationContext());
+                                                //если мы ходим успешно
+                                                if (withCapture != 0) {
+                                                    renderBoard();
+
+
+                                                    Log.i(LOG_TAG, finalI + " " + finalJ);
+                                                    //если мы сделали ход со взятием и можем продолжить ход
+                                                    if (withCapture == 2 && thereAreAnyMoves(mBoard, finalI, finalJ, currentPlayer)) {
+                                                        isResumeMove = true;
+                                                        mChooseCell.setX(finalI);
+                                                        mChooseCell.setY(finalJ);
+                                                        renderBoard();
+                                                    } else {
+                                                        isResumeMove = false;
+                                                    }
+                                                    if (!isResumeMove) {
+                                                        if (currentPlayer == 1) {
+                                                            currentPlayer = 2;
+                                                            messageView = (TextView) findViewById(R.id.message);
+                                                            if (endGame)
+                                                                messageView.setText("");
+                                                            else
+                                                                messageView.setText("Ход игрока №2 (Белые)");
+                                                        } else {
+                                                            currentPlayer = 1;
+                                                            messageView = (TextView) findViewById(R.id.message);
+                                                            if (endGame)
+                                                                messageView.setText("");
+                                                            else
+                                                                messageView.setText("Ход игрока №1 (Черные)");
+                                                        }
+                                                        numberMove++;
+                                                    }
                                                 }
-                                                numberMove++;
+                                            } else {
+                                                Toast toast = Toast.makeText(getApplicationContext(),
+                                                        "Есть шашки, которыми можно бить, выберите другую шашку",
+                                                        Toast.LENGTH_SHORT);
+                                                toast.show();
                                             }
                                         } else {
                                             Toast toast = Toast.makeText(getApplicationContext(),
@@ -217,8 +267,8 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
+    //private boolean
     private void showResults() {
-        //if(endGame) {
         Log.i(LOG_TAG, "show res");
         messageView = (TextView) findViewById(R.id.message);
         if (mBoard.getScore().getmScoreWhite() == 12) {
@@ -232,7 +282,6 @@ public class GameActivity extends AppCompatActivity {
             else
                 messageView.setText("Победа за игроком №1! Поздравляем!");
         }
-        //}
     }
 
     private void moveEnemy() {
@@ -261,7 +310,7 @@ public class GameActivity extends AppCompatActivity {
                                     numberMove++;
                                     Log.i(LOG_TAG, "Number move: " + numberMove);
                                     messageView = (TextView) findViewById(R.id.message);
-                                    if(endGame)
+                                    if (endGame)
                                         messageView.setText("");
                                     else
                                         messageView.setText("Ваш ход");
@@ -304,7 +353,7 @@ public class GameActivity extends AppCompatActivity {
         return false;
     }
 
-    //Получаем доступные клетки, куда мы можем пойти
+    //Получаить доступные клетки, куда мы можем пойти
     private List<Cell> getAvailCellsInBoard(Board board, int begI, int begJ, int colorPlayer) {
 
         mandatoryMoves = new ArrayList<>();
@@ -318,7 +367,7 @@ public class GameActivity extends AppCompatActivity {
                             availCells.add(new Cell(i, j));
                         } else if (flag == 2) {
                             Log.i(LOG_TAG, "!!! " + availCells.toString());
-                            //если нашел первый ход со взятием, то ходит в него
+                            //если нашел первый ход со взятием, то добалвяем его в обязательные ходы
                             availCells.clear();
                             availCells.add(new Cell(i, j));
 
@@ -332,6 +381,55 @@ public class GameActivity extends AppCompatActivity {
             }
         }
         return availCells;
+    }
+
+    //Получить все ходы, в которых мы бьем
+    private List<PairCell> getAllMandatoryMoves(Board board, int colorPlayer) {
+        List<PairCell> allMandatoryMoves = new ArrayList<>();
+        //Идем по всем шашкам выбранного игрока
+        for (int k = 0; k < ROWS; k++) {
+            for (int u = 0; u < COLUMNS; u++) {
+                if (board.getCell(k, u) == colorPlayer) {
+                    //проверяем все свободные клетки на то, можно ли пойти и со взятием или нет
+                    for (int i = 0; i < ROWS; i++) {
+                        for (int j = 0; j < COLUMNS; j++) {
+                            if (board.getCell(i, j) == 0) {
+                                int flag = board.isValidMove(k, u, i, j, colorPlayer);
+                                if (flag == 2) {
+                                    //если нашел ход со взятием, то добалвяем его в обязательные ходы
+                                    allMandatoryMoves.add(new PairCell(k, u, i, j));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Log.i(LOG_TAG, allMandatoryMoves.toString());
+        return allMandatoryMoves;
+    }
+
+    //Проверка, есть ли еще ходы для битья у текущего игрока
+    private boolean thereAreAnyMoves(Board board, int begI, int begJ, int colorPlayer) { //если да, то ход текущего игрока продолжается, нет - ход переходит
+        mandatoryMoves = new ArrayList<>();
+        if (board.getCell(begI, begJ) == colorPlayer) {
+            for (int i = 0; i < ROWS; i++) {
+                for (int j = 0; j < COLUMNS; j++) {
+                    if (board.getCell(i, j) == 0) {
+                        int flag = board.isValidMove(begI, begJ, i, j, colorPlayer);
+                        if (flag == 2) {
+                            mandatoryMoves.add(new PairCell(new Cell(begI, begJ), new Cell(i, j)));
+
+                        }
+                    }
+                }
+            }
+        }
+        if (mandatoryMoves.isEmpty()) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     //Алгоритм минимакс для вычисления следующего хода компьютера
@@ -363,7 +461,8 @@ public class GameActivity extends AppCompatActivity {
             move.setmEndCell(availCells.get(i));
             getAvailCellsInBoard(reboard, begI, begJ, 2);
             //переставляем на "новой доске" шашку
-            if (!reboard.moveChecker(mandatoryMoves, begI, begJ, availCells.get(i).getX(), availCells.get(i).getY(), COLOR_ENEMY, this)) {
+            int withCapture = reboard.moveChecker(mandatoryMoves, begI, begJ, availCells.get(i).getX(), availCells.get(i).getY(), COLOR_ENEMY, this);
+            if (withCapture == 0) {
                 availCells.remove(i);
             } else {
                 reboard.showBoard();

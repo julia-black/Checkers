@@ -44,7 +44,25 @@ public class Board {
                     arr[i][j] = 3;
             }
         }
+        //  for (int i = 0; i < N; i++) {
+        //      for (int j = 0; j < N; j++) {
+        //          if (((i == 0 || i == 2) && j % 2 != 0)
+        //                  || (i == 1 && j % 2 == 0)) {
+        //               arr[i][j] = 0;
+        //          } else if ((i == 5 || i == 7) && j % 2 == 0
+        //                  || (i == 6 && j % 2 != 0)) {
+        //                 arr[i][j] = 0;
+        //          } else if (i == 3 && j % 2 == 0 || i == 4 && j % 2 != 0) {
+        //              arr[i][j] = 0;
+        //          } else
+        //              arr[i][j] = 3;
+        //      }
+        //  }
+        //  arr[2][5] = 2;
+        //  arr[4][3] = 1;
+        //  arr[5][2] = 1;
     }
+
 
     public Score getScore() {
         return score;
@@ -72,7 +90,10 @@ public class Board {
     }
 
     //ход шашки
-    public boolean moveChecker(List<PairCell> mandatoryMoves, int begI, int begJ, int i, int j, int checker, Context context) { //checker - цвет выбранной шашки
+    //0 - ошибка
+    //1 - идут без взятия
+    //2 - со взятием
+    public int moveChecker(List<PairCell> mandatoryMoves, int begI, int begJ, int i, int j, int checker, Context context) { //checker - цвет выбранной шашки
         Log.i(LOG_TAG, mandatoryMoves.toString());
         if (mandatoryMoves.isEmpty()) {
             Log.i(LOG_TAG, "mandatory moves is empty");
@@ -84,7 +105,7 @@ public class Board {
                             setCell(i, j, checker);
                             setCell(begI, begJ, 0);
                             checkKing(i, j, checker);
-                            return true;
+                            return 1;
                         }
                         //если со взятием
                         else {
@@ -93,25 +114,25 @@ public class Board {
                             setCell(i, j, checker);
                             setCell(begI, begJ, 0);
                             checkKing(i, j, checker);
-                            return true;
+                            return 2;
                         }
                     } else {
                         Toast toast = Toast.makeText(context,
                                 "Вы не можете пойти в эту клетку",
                                 Toast.LENGTH_SHORT);
                         toast.show();
-                        return false;
+                        return 0;
                     }
                 } else {
                     Toast toast = Toast.makeText(context,
                             "Эта клетка не пуста!",
                             Toast.LENGTH_SHORT);
                     toast.show();
-                    return false;
+                    return 0;
                 }
             } else {
                 Log.i(LOG_TAG, "Error, wrong current check");
-                return false;
+                return 0;
             }
         } else {
             Log.i(LOG_TAG, "mandatory moves is NOT empty");
@@ -120,26 +141,26 @@ public class Board {
             //если ход игрока является одним из обязательных ходов
             if (getCell(begI, begJ) == checker && arr[i][j] == 0
                     && isValidMove(begI, begJ, i, j, checker) == 2
-                    && containsPairCell(mandatoryMoves,pairCell) ) { //если в этой ячейке стоит такой цвет и конечная клетка пуста
-                    Log.i(LOG_TAG, "contains");
-                    capture(begI, begJ, i, j, checker);
-                    setCell(i, j, checker);
-                    setCell(begI, begJ, 0);
-                    checkKing(i, j, checker);
-                    return true;
+                    && containsPairCell(mandatoryMoves, pairCell)) { //если в этой ячейке стоит такой цвет и конечная клетка пуста
+                Log.i(LOG_TAG, "contains");
+                capture(begI, begJ, i, j, checker);
+                setCell(i, j, checker);
+                setCell(begI, begJ, 0);
+                checkKing(i, j, checker);
+                return 2;
             } else {
                 Toast toast = Toast.makeText(context,
                         "Вы обязаны бить!",
                         Toast.LENGTH_SHORT);
                 toast.show();
-                return false;
+                return 0;
             }
         }
     }
 
-    private boolean containsPairCell(List<PairCell> list, PairCell pairCell){
+    private boolean containsPairCell(List<PairCell> list, PairCell pairCell) {
         for (PairCell p : list) {
-            if(p.equals(pairCell)){
+            if (p.equals(pairCell)) {
                 return true;
             }
         }
@@ -187,10 +208,10 @@ public class Board {
                     //если идет влево и там стоит вражеская белая шашка
                     if (checker == COLOR_PLAYER) {
                         if (j == begJ - 2 && (arr[i + 1][j + 1] == COLOR_ENEMY || arr[i + 1][j + 1] == COLOR_ENEMY_KING)) {
-                          //  captureEnemyChecker(i + 1, j + 1, arr[i + 1][j + 1]);
+                            //  captureEnemyChecker(i + 1, j + 1, arr[i + 1][j + 1]);
                             return 2;
                         } else if (j == begJ + 2 && (arr[i + 1][j - 1] == COLOR_ENEMY || arr[i + 1][j - 1] == COLOR_ENEMY_KING)) {
-                           // captureEnemyChecker(i + 1, j - 1, arr[i + 1][j - 1]);
+                            // captureEnemyChecker(i + 1, j - 1, arr[i + 1][j - 1]);
                             return 2;
                         }
                     } else if (checker == COLOR_PLAYER_KING) {
@@ -209,55 +230,55 @@ public class Board {
     }
 
     public void capture(int begI, int begJ, int i, int j, int checker) {
-       // if ((i == begI + 2) || (checker == COLOR_ENEMY_KING && i == begI - 2)) {
-            //если идет влево и там стоит вражеская белая шашка
-            if (checker == COLOR_ENEMY) {
-                if (begI < 7 && begJ < 7 && j == begJ + 2 && (arr[begI + 1][begJ + 1] == COLOR_PLAYER || arr[begI + 1][begJ + 1] == COLOR_PLAYER_KING)) {
-                    captureEnemyChecker(begI + 1, begJ + 1, arr[begI + 1][begJ + 1]);
-                } else if (begI < 7 && begJ > 1)
-                    if (j == begJ - 2 && (arr[begI + 1][begJ - 1] == COLOR_PLAYER || arr[begI + 1][begJ - 1] == COLOR_PLAYER_KING)) {
-                       captureEnemyChecker(begI + 1, begJ - 1, arr[begI + 1][begJ - 1]);
-                    }
-            } else if (checker == COLOR_ENEMY_KING) {
-                if (j == begJ + 2 && (arr[begI - 1][begJ + 1] == COLOR_PLAYER || arr[begI - 1][begJ + 1] == COLOR_PLAYER_KING)) {
-                    captureEnemyChecker(begI - 1, begJ + 1, arr[begI - 1][begJ + 1]);
-                } else if (begJ > 1)
-                    if (j == begJ - 2 && (arr[begI - 1][begJ - 1] == COLOR_PLAYER || arr[begI - 1][begJ - 1] == COLOR_PLAYER_KING)) {
-                        captureEnemyChecker(begI - 1, begJ - 1, arr[begI - 1][begJ - 1]);
-                    }
-            } else if (checker == COLOR_PLAYER) {
-                if (j == begJ - 2 && (arr[i + 1][j + 1] == COLOR_ENEMY || arr[i + 1][j + 1] == COLOR_ENEMY_KING)) {
-                    captureEnemyChecker(i + 1, j + 1, arr[i + 1][j + 1]);
-                   // return 2;
-                } else if (j == begJ + 2 && (arr[i + 1][j - 1] == COLOR_ENEMY || arr[i + 1][j - 1] == COLOR_ENEMY_KING)) {
-                    captureEnemyChecker(i + 1, j - 1, arr[i + 1][j - 1]);
-                    //return 2;
+        // if ((i == begI + 2) || (checker == COLOR_ENEMY_KING && i == begI - 2)) {
+        //если идет влево и там стоит вражеская белая шашка
+        if (checker == COLOR_ENEMY) {
+            if (begI < 7 && begJ < 7 && j == begJ + 2 && (arr[begI + 1][begJ + 1] == COLOR_PLAYER || arr[begI + 1][begJ + 1] == COLOR_PLAYER_KING)) {
+                captureEnemyChecker(begI + 1, begJ + 1, arr[begI + 1][begJ + 1]);
+            } else if (begI < 7 && begJ > 1)
+                if (j == begJ - 2 && (arr[begI + 1][begJ - 1] == COLOR_PLAYER || arr[begI + 1][begJ - 1] == COLOR_PLAYER_KING)) {
+                    captureEnemyChecker(begI + 1, begJ - 1, arr[begI + 1][begJ - 1]);
                 }
-            } else if (checker == COLOR_PLAYER_KING) {
-                if (j == begJ - 2 && (arr[i - 1][j + 1] == COLOR_ENEMY || arr[i - 1][j + 1] == COLOR_ENEMY_KING)) {
-                    captureEnemyChecker(i - 1, j + 1, arr[i - 1][j + 1]);
-                  //  return 2;
-                } else if (j == begJ + 2 && (arr[i - 1][j - 1] == COLOR_ENEMY || arr[i - 1][j - 1] == COLOR_ENEMY_KING)) {
-                    captureEnemyChecker(i - 1, j - 1, arr[i - 1][j - 1]);
-                    //return 2;
+        } else if (checker == COLOR_ENEMY_KING) {
+            if (j == begJ + 2 && (arr[begI - 1][begJ + 1] == COLOR_PLAYER || arr[begI - 1][begJ + 1] == COLOR_PLAYER_KING)) {
+                captureEnemyChecker(begI - 1, begJ + 1, arr[begI - 1][begJ + 1]);
+            } else if (begJ > 1)
+                if (j == begJ - 2 && (arr[begI - 1][begJ - 1] == COLOR_PLAYER || arr[begI - 1][begJ - 1] == COLOR_PLAYER_KING)) {
+                    captureEnemyChecker(begI - 1, begJ - 1, arr[begI - 1][begJ - 1]);
                 }
+        } else if (checker == COLOR_PLAYER) {
+            if (j == begJ - 2 && (arr[i + 1][j + 1] == COLOR_ENEMY || arr[i + 1][j + 1] == COLOR_ENEMY_KING)) {
+                captureEnemyChecker(i + 1, j + 1, arr[i + 1][j + 1]);
+                // return 2;
+            } else if (j == begJ + 2 && (arr[i + 1][j - 1] == COLOR_ENEMY || arr[i + 1][j - 1] == COLOR_ENEMY_KING)) {
+                captureEnemyChecker(i + 1, j - 1, arr[i + 1][j - 1]);
+                //return 2;
             }
-     //   }
+        } else if (checker == COLOR_PLAYER_KING) {
+            if (j == begJ - 2 && (arr[i - 1][j + 1] == COLOR_ENEMY || arr[i - 1][j + 1] == COLOR_ENEMY_KING)) {
+                captureEnemyChecker(i - 1, j + 1, arr[i - 1][j + 1]);
+                //  return 2;
+            } else if (j == begJ + 2 && (arr[i - 1][j - 1] == COLOR_ENEMY || arr[i - 1][j - 1] == COLOR_ENEMY_KING)) {
+                captureEnemyChecker(i - 1, j - 1, arr[i - 1][j - 1]);
+                //return 2;
+            }
+        }
+        //   }
 
-       // if (begI < 7 && begJ < 7 && j == begJ + 2 && (arr[begI + 1][begJ + 1] == COLOR_PLAYER || arr[begI + 1][begJ + 1] == COLOR_PLAYER_KING)) {
-       //     captureEnemyChecker(begI + 1, begJ + 1, arr[begI + 1][begJ + 1]);
-       // } else if (begI < 7 && begJ > 1)
-       //     if (j == begJ - 2 && (arr[begI + 1][begJ - 1] == COLOR_PLAYER || arr[begI + 1][begJ - 1] == COLOR_PLAYER_KING)) {
-       //         captureEnemyChecker(begI + 1, begJ - 1, arr[begI + 1][begJ - 1]);
-       //     }
+        // if (begI < 7 && begJ < 7 && j == begJ + 2 && (arr[begI + 1][begJ + 1] == COLOR_PLAYER || arr[begI + 1][begJ + 1] == COLOR_PLAYER_KING)) {
+        //     captureEnemyChecker(begI + 1, begJ + 1, arr[begI + 1][begJ + 1]);
+        // } else if (begI < 7 && begJ > 1)
+        //     if (j == begJ - 2 && (arr[begI + 1][begJ - 1] == COLOR_PLAYER || arr[begI + 1][begJ - 1] == COLOR_PLAYER_KING)) {
+        //         captureEnemyChecker(begI + 1, begJ - 1, arr[begI + 1][begJ - 1]);
+        //     }
 //
-       // if (arr[begI][begJ] == COLOR_ENEMY_KING) {
-       //     if (j == begJ - 2 && (arr[begI - 1][begJ - 1] == COLOR_PLAYER || arr[begI - 1][begJ - 1] == COLOR_PLAYER_KING)) {
-       //         captureEnemyChecker(begI - 1, begJ - 1, arr[begI - 1][begJ - 1]);
-       //     } else if (j == begJ + 2 && (arr[begI - 1][begJ + 1] == COLOR_PLAYER || arr[begI - 1][begJ + 1] == COLOR_PLAYER_KING)) {
-       //         captureEnemyChecker(begI - 1, begJ + 1, arr[begI - 1][begJ + 1]);
-       //     }
-       // }
+        // if (arr[begI][begJ] == COLOR_ENEMY_KING) {
+        //     if (j == begJ - 2 && (arr[begI - 1][begJ - 1] == COLOR_PLAYER || arr[begI - 1][begJ - 1] == COLOR_PLAYER_KING)) {
+        //         captureEnemyChecker(begI - 1, begJ - 1, arr[begI - 1][begJ - 1]);
+        //     } else if (j == begJ + 2 && (arr[begI - 1][begJ + 1] == COLOR_PLAYER || arr[begI - 1][begJ + 1] == COLOR_PLAYER_KING)) {
+        //         captureEnemyChecker(begI - 1, begJ + 1, arr[begI - 1][begJ + 1]);
+        //     }
+        // }
     }
 
     //Захват вражеской клетки
@@ -273,38 +294,38 @@ public class Board {
     public boolean isEndOfGame(Context context, int countOfPlayers) {
         Toast toast;
         if (score.getmScoreWhite() == 12) {
-           if (countOfPlayers == 1 && temp == 0) {
-               temp = 1;
-               toast = Toast.makeText(context,
-                       "К сожалению, Вы проиграли.",
-                       Toast.LENGTH_SHORT);
-               toast.show();
-           } else {
-               if (temp == 0) {
-                   temp = 1;
-                   toast = Toast.makeText(context,
-                           "Победа за игроком №2! Поздравляем!",
-                           Toast.LENGTH_SHORT);
-                   toast.show();
-               }
-           }
+            if (countOfPlayers == 1 && temp == 0) {
+                temp = 1;
+                toast = Toast.makeText(context,
+                        "К сожалению, Вы проиграли.",
+                        Toast.LENGTH_SHORT);
+                toast.show();
+            } else {
+                if (temp == 0) {
+                    temp = 1;
+                    toast = Toast.makeText(context,
+                            "Победа за игроком №2! Поздравляем!",
+                            Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+            }
             return true;
         } else if (score.getmScoreBlack() == 12) {
-           if (countOfPlayers == 1 && temp == 0) {
-               temp = 1;
-               toast = Toast.makeText(context,
-                       "Поздравляем! Вы победили!",
-                       Toast.LENGTH_SHORT);
-               toast.show();
-           } else {
-               if (temp == 0) {
-                   temp = 1;
-                   toast = Toast.makeText(context,
-                           "Победа за игроком №1! Поздравляем!",
-                           Toast.LENGTH_SHORT);
-                   toast.show();
-               }
-           }
+            if (countOfPlayers == 1 && temp == 0) {
+                temp = 1;
+                toast = Toast.makeText(context,
+                        "Поздравляем! Вы победили!",
+                        Toast.LENGTH_SHORT);
+                toast.show();
+            } else {
+                if (temp == 0) {
+                    temp = 1;
+                    toast = Toast.makeText(context,
+                            "Победа за игроком №1! Поздравляем!",
+                            Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+            }
             return true;
         }
         return false;
