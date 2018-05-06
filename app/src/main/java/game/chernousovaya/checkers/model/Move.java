@@ -3,24 +3,30 @@ package game.chernousovaya.checkers.model;
 public class Move {
     Cell mBegCell;
     Cell mEndCell;
-    int mScoreEnemy;
+    int evalFunc;
 
-    public int getmScoreEnemy() {
-        return mScoreEnemy;
+
+    public Move(Cell mBegCell, Cell mEndCell, int evalFunc) {
+        this.mBegCell = mBegCell;
+        this.mEndCell = mEndCell;
+        this.evalFunc = evalFunc;
     }
 
-    @Override
-    public String toString() {
-        return "Move{" +
-                "mBegCell=" + mBegCell +
-                ", mEndCell=" + mEndCell +
-                ", mScoreEnemy=" + mScoreEnemy +
-                '}';
+    public int getEvalFunc() {
+        return evalFunc;
+    }
+
+    public void setEvalFunc(int evalFunc) {
+        this.evalFunc = evalFunc;
     }
 
     public Move() {
     }
-
+    public Move (PairCell pairCell, int evalFunc){
+        this.mBegCell = pairCell.getmBegCell();
+        this.mEndCell = pairCell.getmEndCell();
+        this.evalFunc = evalFunc;
+    }
     public Cell getmBegCell() {
         return mBegCell;
     }
@@ -37,13 +43,9 @@ public class Move {
         this.mEndCell = mEndCell;
     }
 
-    public void setmScoreEnemy(int mScoreEnemy) {
-        this.mScoreEnemy = mScoreEnemy;
+    public PairCell getPairCell(){
+        return new PairCell(this.mBegCell, this.mEndCell);
     }
 
-    public Move(Cell mBegCell, Cell mEndCell, int mScoreEnemy) {
-        this.mBegCell = mBegCell;
-        this.mEndCell = mEndCell;
-        this.mScoreEnemy = mScoreEnemy;
-    }
+
 }
