@@ -8,6 +8,8 @@
         android:roundIcon="@drawable/icon"
         android:theme="@style/AppTheme"
         android:supportsRtl="true"
+        android:hardwareAccelerated="false"
+        android:largeHeap="true"
         >
 
         <activity android:name=".controller.activities.MainMenu"

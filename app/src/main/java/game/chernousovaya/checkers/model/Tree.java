@@ -22,20 +22,26 @@ public class Tree {
         this.nodes = nodes;
     }
 
+    //Получить максимальный элемент на уровне level
     public Node getMaxInLevel(int level) {
         int maxEval = -100;
-        Node result = null;
         ArrayList<Node> maxElements = new ArrayList<>();
         ArrayList<Node> nodeArrayList = getNodesByLevel(level);
+        Node result = null;
         for (int i = 0; i < nodeArrayList.size(); i++) {
-            if (nodeArrayList.get(i).getBoard().evaluationFunction() >= maxEval) {
-                maxEval = nodeArrayList.get(i).getBoard().evaluationFunction();
+            if (nodeArrayList.get(i).getBoard().evaluationFunction(nodeArrayList.get(i).getMove().getmEndCell().getX(),
+                    nodeArrayList.get(i).getMove().getmEndCell().getY(), 2) >= maxEval) {
+                maxEval = nodeArrayList.get(i).getBoard().evaluationFunction(nodeArrayList.get(i).getMove().getmEndCell().getX(), nodeArrayList.get(i).getMove().getmEndCell().getY(), 2);
                 result = nodeArrayList.get(i);
-                maxElements.add(result);
+            }
+        }
+        for (int i = 0; i < nodeArrayList.size(); i++) {
+            if (nodeArrayList.get(i).getEvalMinMax() == maxEval) {
+                maxElements.add(nodeArrayList.get(i));
             }
         }
         //Если количество одинаковых элементов > 1, то выбираем случайным образом из них
-        if(maxElements.size() > 1) {
+        if (maxElements.size() > 1) {
             Random random = new Random();
             result = maxElements.get(random.nextInt(maxElements.size() - 1));
         }
@@ -44,9 +50,9 @@ public class Tree {
 
     //Получить уровень узла
     public int getLevelNode(int idx) {
-        //Нашли его предка
         int level = 1;
-        if(idx < nodes.size() && idx != -1) {
+        if (idx < nodes.size() && idx != -1) {
+            //Находим его предка
             int idxParent = nodes.get(idx).idxParent;
             while (idxParent > -1) {
                 level++;
@@ -57,7 +63,7 @@ public class Tree {
         return level;
     }
 
-
+    //Получить все узлы дерева на уровне level
     public ArrayList<Node> getNodesByLevel(int level) {
         ArrayList<Node> arrayList = new ArrayList<>();
         for (int i = 0; i < nodes.size(); i++) {
@@ -68,6 +74,7 @@ public class Tree {
         return arrayList;
     }
 
+    //Получить детей узла
     public ArrayList<Node> getChildrens(int idxParent) {
         ArrayList<Node> childrens = new ArrayList<>();
         for (int i = 0; i < nodes.size(); i++) {
@@ -81,19 +88,8 @@ public class Tree {
         nodes.add(new Node(move, board, idxParent, level));
     }
 
-    public void addChildren(PairCell move, Board board, int idxParent, int level, int evalMinMax) {
+    public synchronized void addChildren(PairCell move, Board board, int idxParent, int level, int evalMinMax) {
         nodes.add(new Node(move, board, idxParent, level, evalMinMax));
-    }
-
-    public void showTree() {
-        System.out.println("Root " + nodes.get(0).getMove());
-        for (int i = 0; i < nodes.size(); i++) {
-            ArrayList<Node> childrens = getChildrens(i);
-            for (int j = 0; j < childrens.size(); j++) {
-                System.out.print(childrens.get(j).getMove() + " ");
-            }
-            System.out.println("Root " + nodes.get(i).getMove());
-        }
     }
 
     public static class Node {
@@ -102,6 +98,24 @@ public class Tree {
         private int idxParent;
         private int level;
         private int evalMinMax;
+        private int alpha;
+        private int beta;
+
+        public int getAlpha() {
+            return alpha;
+        }
+
+        public void setAlpha(int alpha) {
+            this.alpha = alpha;
+        }
+
+        public int getBeta() {
+            return beta;
+        }
+
+        public void setBeta(int betta) {
+            this.beta = betta;
+        }
 
         public int getEvalMinMax() {
             return evalMinMax;
@@ -109,6 +123,12 @@ public class Tree {
 
         public void setEvalMinMax(int evalMinMax) {
             this.evalMinMax = evalMinMax;
+            //Если это мин элемент
+            if (level % 2 == 0) {
+                this.beta = evalMinMax;
+            } else {
+                this.alpha = evalMinMax;
+            }
         }
 
         public int getLevel() {
@@ -124,6 +144,11 @@ public class Tree {
             this.board = board;
             this.idxParent = idxParent;
             this.level = level;
+            if (level % 2 == 0) {
+                this.beta = evalMinMax;
+            } else {
+                this.alpha = evalMinMax;
+            }
         }
 
         public Node(PairCell move, Board board, int idxParent, int level, int evalMinMax) {
@@ -132,6 +157,11 @@ public class Tree {
             this.idxParent = idxParent;
             this.level = level;
             this.evalMinMax = evalMinMax;
+            if (level % 2 == 0) {
+                this.beta = evalMinMax;
+            } else {
+                this.alpha = evalMinMax;
+            }
         }
 
         public PairCell getMove() {

@@ -22,11 +22,13 @@ public class Move {
 
     public Move() {
     }
-    public Move (PairCell pairCell, int evalFunc){
+
+    public Move(PairCell pairCell, int evalFunc) {
         this.mBegCell = pairCell.getmBegCell();
         this.mEndCell = pairCell.getmEndCell();
         this.evalFunc = evalFunc;
     }
+
     public Cell getmBegCell() {
         return mBegCell;
     }
@@ -43,7 +45,7 @@ public class Move {
         this.mEndCell = mEndCell;
     }
 
-    public PairCell getPairCell(){
+    public PairCell getPairCell() {
         return new PairCell(this.mBegCell, this.mEndCell);
     }
 

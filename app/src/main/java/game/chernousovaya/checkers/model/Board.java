@@ -23,10 +23,10 @@ public class Board {
 
     //0 - пусто
     //3 - белая клетка, на нее нельзя ходить
-    //2 - белая шашка (компьютера)
-    //1 - черная шашка (игрока)
+    //2 - белая шашка
+    //1 - черная шашка
     //4 - дамка белых
-    // 5 - дамка черных
+    //5 - дамка черных
 
     public Board(Board board) {
         this.score.setmScoreBlack(board.score.getmScoreWhite());
@@ -56,30 +56,25 @@ public class Board {
                     arr[i][j] = 3;
             }
         }
-      // for (int i = 0; i < N; i++) {
-      //     for (int j = 0; j < N; j++) {
-      //         if (((i == 0 || i == 2) && j % 2 != 0)
-      //                 || (i == 1 && j % 2 == 0)) {
-      //             arr[i][j] = 0;
-      //         } else if ((i == 5 || i == 7) && j % 2 == 0
-      //                 || (i == 6 && j % 2 != 0)) {
-      //             arr[i][j] = 0;
-      //         } else if (i == 3 && j % 2 == 0 || i == 4 && j % 2 != 0) {
-      //             arr[i][j] = 0;
-      //         } else
-      //             arr[i][j] = 3;
-      //     }
-      // }
-      // arr[3][4] = 1;
-      // arr[2][5] = 2;
-      // arr[2][3] = 2;
     }
 
-    public int evaluationFunction() {
+    private boolean isBadMoveWhite(int i, int j, int color) {
+        if (color == COLOR_ENEMY) {
+            if (i < 7) {
+                if ((j < 7 && arr[i + 1][j + 1] == COLOR_PLAYER) || (j > 0 && arr[i + 1][j - 1] == COLOR_PLAYER))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    //Оценочная функция
+    public int evaluationFunction(int x, int y, int color) {
         int countBlack = 0;
         int countWhite = 0;
         int countKingBlack = 0;
         int countKingWhite = 0;
+        int k = isBadMoveWhite(x, y, color) ? 1 : 0;
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 switch (arr[i][j]) {
@@ -97,10 +92,8 @@ public class Board {
                 }
             }
         }
-        return (countWhite - countBlack) + 3 * (countKingWhite - countKingBlack);
-
+        return (countWhite - countBlack) + 3 * (countKingWhite - countKingBlack) - k;
     }
-
 
     public Score getScore() {
         return score;
@@ -118,6 +111,7 @@ public class Board {
         arr[i][j] = checker;
     }
 
+    //Проверить, не стала ли шашка дамкой
     private void checkKing(int i, int j, int checker) {
         if ((checker == COLOR_PLAYER) && (i == 0)) {
             setCell(i, j, COLOR_PLAYER_KING);
@@ -140,7 +134,6 @@ public class Board {
                     if (arr[i][j] == 0) { //если конечная клетка пуста
                         if (isValidMove(begI, begJ, i, j, checker) != 0) {
                             if (isValidMove(begI, begJ, i, j, checker) == 1) {
-                                //   Log.i(LOG_TAG, "Обнуляется - " + begI + "," + begJ);
                                 setCell(i, j, checker);
                                 setCell(begI, begJ, 0);
                                 checkKing(i, j, checker);
@@ -148,7 +141,6 @@ public class Board {
                             }
                             //если со взятием
                             else {
-                                //    Log.i(LOG_TAG, "Обнуляется - " + begI + "," + begJ);
                                 capture(begI, begJ, i, j, checker);
                                 setCell(i, j, checker);
                                 setCell(begI, begJ, 0);
@@ -163,10 +155,10 @@ public class Board {
                             return 0;
                         }
                     } else {
-                        // Toast toast = Toast.makeText(context,
-                        //         "Эта клетка не пуста!",
-                        //         Toast.LENGTH_SHORT);
-                        // toast.show();
+                        Toast toast = Toast.makeText(context,
+                                "Эта клетка не пуста!",
+                                Toast.LENGTH_SHORT);
+                        toast.show();
                         return 0;
                     }
                 } else {
@@ -174,9 +166,7 @@ public class Board {
                     return 0;
                 }
             } else {
-                //  Log.i(LOG_TAG, "mandatory moves is NOT empty");
                 PairCell pairCell = new PairCell(new Cell(begI, begJ), new Cell(i, j));
-                //   Log.i(LOG_TAG, pairCell.toString());
                 //если ход игрока является одним из обязательных ходов
                 if (getCell(begI, begJ) == checker && arr[i][j] == 0
                         && isValidMove(begI, begJ, i, j, checker) == 2
@@ -198,20 +188,14 @@ public class Board {
         return 0;
     }
 
-    //Ход без уведомлений
-    //0 - ошибка
-    //1 - идут без взятия
-    //2 - со взятием
+    //Ход без уведомлений (для алгоритма минимакс)
     public int moveCheckerWithoutToast(List<PairCell> mandatoryMoves, int begI, int begJ, int i, int j, int checker, Context context) { //checker - цвет выбранной шашки
-        // Log.i(LOG_TAG, mandatoryMoves.toString());
         if (!GameActivity.noMoves) {
             if (mandatoryMoves.isEmpty()) {
-                //   Log.i(LOG_TAG, "mandatory moves is empty");
                 if (getCell(begI, begJ) == checker) { //если в этой ячейке стоит такой цвет
                     if (arr[i][j] == 0) { //если конечная клетка пуста
                         if (isValidMove(begI, begJ, i, j, checker) != 0) {
                             if (isValidMove(begI, begJ, i, j, checker) == 1) {
-                                //   Log.i(LOG_TAG, "Обнуляется - " + begI + "," + begJ);
                                 setCell(i, j, checker);
                                 setCell(begI, begJ, 0);
                                 checkKing(i, j, checker);
@@ -219,7 +203,6 @@ public class Board {
                             }
                             //если со взятием
                             else {
-                                //  Log.i(LOG_TAG, "Обнуляется - " + begI + "," + begJ);
                                 capture(begI, begJ, i, j, checker);
                                 setCell(i, j, checker);
                                 setCell(begI, begJ, 0);
@@ -227,11 +210,11 @@ public class Board {
                                 return 2;
                             }
                         } else {
-                            Log.i(LOG_TAG, "Не валидный ход" + checker + " " + getCell(begI, begJ) + " [" + begI + "," + begJ + "] " + i +"," + j + " " + arr[i][j]);
+                            Log.i(LOG_TAG, "Не валидный ход" + checker + " " + getCell(begI, begJ) + " [" + begI + "," + begJ + "] " + i + "," + j + " " + arr[i][j]);
                             return 0;
                         }
                     } else {
-                        Log.i(LOG_TAG, "Эта клетка не пуста" + checker + " " + getCell(begI, begJ) + " [" + begI + "," + begJ + "] " + i +"," + j + " " + arr[i][j]);
+                        Log.i(LOG_TAG, "Эта клетка не пуста" + checker + " " + getCell(begI, begJ) + " [" + begI + "," + begJ + "] " + i + "," + j + " " + arr[i][j]);
                         return 0;
                     }
                 } else {
@@ -239,21 +222,18 @@ public class Board {
                     return 0;
                 }
             } else {
-                // Log.i(LOG_TAG, "mandatory moves is NOT empty");
                 PairCell pairCell = new PairCell(new Cell(begI, begJ), new Cell(i, j));
-                //   Log.i(LOG_TAG, pairCell.toString());
                 //если ход игрока является одним из обязательных ходов
                 if (getCell(begI, begJ) == checker && arr[i][j] == 0
                         && isValidMove(begI, begJ, i, j, checker) == 2
                         && containsPairCell(mandatoryMoves, pairCell)) { //если в этой ячейке стоит такой цвет и конечная клетка пуста
-                    //  Log.i(LOG_TAG, "contains");
                     capture(begI, begJ, i, j, checker);
                     setCell(i, j, checker);
                     setCell(begI, begJ, 0);
                     checkKing(i, j, checker);
                     return 2;
                 } else {
-                    Log.i(LOG_TAG, "mandatory moves not empty, but error" + checker + " " + getCell(begI, begJ) + " " + begI + " " + begJ + " " + i +"," + j);
+                    Log.i(LOG_TAG, "mandatory moves not empty, but error" + checker + " " + getCell(begI, begJ) + " " + begI + " " + begJ + " " + i + "," + j);
                     return 0;
                 }
             }
@@ -261,6 +241,7 @@ public class Board {
         return 0;
     }
 
+    //Содержится ли этот ход в списке
     private boolean containsPairCell(List<PairCell> list, PairCell pairCell) {
         for (PairCell p : list) {
             if (p.equals(pairCell)) {
@@ -270,7 +251,7 @@ public class Board {
         return false;
     }
 
-    //проверка хода на валидность
+    //Проверка хода на валидность
     //0 - не валидный
     //1 - валидный, без взятия
     //2 - валидный и со взятием
@@ -303,7 +284,6 @@ public class Board {
                 }
             } else if (checker == COLOR_PLAYER || checker == COLOR_PLAYER_KING) { //если ходят черные
                 //если они идут без взятия
-
                 if ((i == begI - 1 || (checker == COLOR_PLAYER_KING && i == begI + 1)) && (j == begJ + 1 || j == begJ - 1)) {
                     return 1;
                 }
@@ -316,7 +296,6 @@ public class Board {
                         } else if ((i < 7 && j > 0) && (j == begJ + 2 && (arr[i + 1][j - 1] == COLOR_ENEMY || arr[i + 1][j - 1] == COLOR_ENEMY_KING))) {
                             return 2;
                         }
-
                     }
                     if (checker == COLOR_PLAYER_KING) {
                         if ((i > 0 && begI > 0) && (j == begJ - 2 && (arr[i - 1][begJ - 1] == COLOR_ENEMY || arr[i - 1][begJ - 1] == COLOR_ENEMY_KING))) {
@@ -331,6 +310,7 @@ public class Board {
         return 0;
     }
 
+    //Захват шашки
     public void capture(int begI, int begJ, int i, int j, int checker) {
         //если идет влево и там стоит вражеская белая шашка
         if (checker == COLOR_ENEMY || checker == COLOR_ENEMY_KING) {
@@ -364,7 +344,7 @@ public class Board {
         }
     }
 
-    //Захват вражеской клетки
+    //Обнуление вражеской шашки и обновление счета
     private void captureEnemyChecker(int i, int j, int colorEnemyChecker) {
         arr[i][j] = 0;
         if (colorEnemyChecker == COLOR_ENEMY || colorEnemyChecker == COLOR_ENEMY_KING) {
@@ -416,14 +396,14 @@ public class Board {
         return false;
     }
 
-    //отобразить в лог расстановку
+    //Отобразить в лог расстановку
     public void showBoard() {
         for (int i = 0; i < N; i++) {
             String str = "";
             for (int j = 0; j < N; j++) {
                 str += arr[i][j] + " ";
             }
-            // Log.i("Board", str);
+            Log.i(LOG_TAG, str);
         }
     }
 

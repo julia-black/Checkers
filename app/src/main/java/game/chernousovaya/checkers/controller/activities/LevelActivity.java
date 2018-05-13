@@ -16,39 +16,29 @@ public class LevelActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_level);
 
-
         Button twoPlayersButton = (Button) findViewById(R.id.button_start_two);
         Button onePlayerEasyButton = (Button) findViewById(R.id.button_start_one_easy);
         Button onePlayerHardButton = (Button) findViewById(R.id.button_start_one_hard);
 
-        onePlayerEasyButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(LevelActivity.this, GameActivity.class);
-                intent.putExtra("count_players", 1);
-                intent.putExtra("level", "easy");
-                startActivity(intent);
-            }
+        onePlayerEasyButton.setOnClickListener(view -> {
+            Intent intent = new Intent(LevelActivity.this, GameActivity.class);
+            intent.putExtra("count_players", 1);
+            intent.putExtra("level", "easy");
+            startActivity(intent);
         });
 
-        onePlayerHardButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(LevelActivity.this, GameActivity.class);
-                intent.putExtra("count_players", 1);
-                intent.putExtra("level", "hard");
-                startActivity(intent);
-            }
+        onePlayerHardButton.setOnClickListener(view -> {
+            Intent intent = new Intent(LevelActivity.this, GameActivity.class);
+            intent.putExtra("count_players", 1);
+            intent.putExtra("level", "hard");
+            startActivity(intent);
         });
 
-        twoPlayersButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(LevelActivity.this, GameActivity.class);
-                intent.putExtra("count_players", 2);
-                intent.putExtra("level", "easy");
-                startActivity(intent);
-            }
+        twoPlayersButton.setOnClickListener(view -> {
+            Intent intent = new Intent(LevelActivity.this, GameActivity.class);
+            intent.putExtra("count_players", 2);
+            intent.putExtra("level", "easy");
+            startActivity(intent);
         });
     }
 }

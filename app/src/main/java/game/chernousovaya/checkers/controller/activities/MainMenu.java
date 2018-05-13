@@ -16,15 +16,9 @@ public class MainMenu extends AppCompatActivity {
         setContentView(R.layout.activity_main_menu);
 
         final Button startButton = (Button) findViewById(R.id.button_start);
-        startButton.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainMenu.this, LevelActivity.class);
-                startActivity(intent);
-            }
+        startButton.setOnClickListener(view -> {
+            Intent intent = new Intent(MainMenu.this, LevelActivity.class);
+            startActivity(intent);
         });
-
     }
-
 }
