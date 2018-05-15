@@ -28,7 +28,6 @@ import game.chernousovaya.checkers.R;
 import game.chernousovaya.checkers.model.Board;
 import game.chernousovaya.checkers.model.Cell;
 import game.chernousovaya.checkers.model.PairCell;
-import game.chernousovaya.checkers.model.Score;
 import game.chernousovaya.checkers.model.Tree;
 
 public class GameActivity extends AppCompatActivity {
@@ -68,6 +67,8 @@ public class GameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
+        endGame = false;
+        noMoves = false;
         Intent intent = getIntent();
         //Получаем переданные из предыдущей активити данные
         countOfPlayers = intent.getIntExtra("count_players", 0);
@@ -268,10 +269,15 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
+
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        mBoard.setScore(new Score());
+        onDestroy();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
     //Показать результат игры
@@ -342,46 +348,51 @@ public class GameActivity extends AppCompatActivity {
 
     //Ход противника
     private void moveEnemy() {
-        messageView = (TextView) findViewById(R.id.message);
-        messageView.setText("Ход противника");
-        isTimerStopped = false;
-        if (isPlayersMoved) {
-            final Timer timer = new Timer();
-            //Таймер нужен, чтобы игрок увидел сначала передвижение своей шашки, а только потом перемещение шашки противника
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    runOnUiThread(() -> {
-                        if (isPlayersMoved) {
-                            try {
-                                Thread.sleep(500);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            isTimerStopped = true;
-                            if (isTimerStopped) {
-                                PairCell newCell = calculateBestMove();
-                                if (newCell.getmBegCell() == null) {
-                                    noMoves = true;
-                                    endGame = true;
-                                    showResults();
-                                    return;
+        if (mBoard.isEndOfGame(this, countOfPlayers)) {
+            endGame = true;
+            showResults();
+        } else {
+            messageView = (TextView) findViewById(R.id.message);
+            messageView.setText("Ход противника");
+            isTimerStopped = false;
+            if (isPlayersMoved) {
+                final Timer timer = new Timer();
+                //Таймер нужен, чтобы игрок увидел сначала передвижение своей шашки, а только потом перемещение шашки противника
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        runOnUiThread(() -> {
+                            if (isPlayersMoved) {
+                                try {
+                                    Thread.sleep(500);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
                                 }
-                                getAvailCellsInBoard(mBoard, newCell.getmBegCell().getX(), newCell.getmBegCell().getY(), 2);
-                                mBoard.moveChecker(mandatoryMoves, newCell.getmBegCell().getX(), newCell.getmBegCell().getY(), newCell.getmEndCell().getX(), newCell.getmEndCell().getY(), mBoard.getCell(newCell.getmBegCell().getX(), newCell.getmBegCell().getY()), getApplicationContext());
-                                messageView = (TextView) findViewById(R.id.message);
-                                if (endGame)
-                                    messageView.setText("");
-                                else
-                                    messageView.setText("Ваш ход");
-                                renderBoard();
-                                isPlayersMoved = false;
-                                isTimerStopped = false;
+                                isTimerStopped = true;
+                                if (isTimerStopped) {
+                                    PairCell newCell = calculateBestMove();
+                                    if (newCell.getmBegCell() == null) {
+                                        noMoves = true;
+                                        endGame = true;
+                                        showResults();
+                                        return;
+                                    }
+                                    getAvailCellsInBoard(mBoard, newCell.getmBegCell().getX(), newCell.getmBegCell().getY(), 2);
+                                    mBoard.moveChecker(mandatoryMoves, newCell.getmBegCell().getX(), newCell.getmBegCell().getY(), newCell.getmEndCell().getX(), newCell.getmEndCell().getY(), mBoard.getCell(newCell.getmBegCell().getX(), newCell.getmBegCell().getY()), getApplicationContext());
+                                    messageView = (TextView) findViewById(R.id.message);
+                                    if (endGame)
+                                        messageView.setText("");
+                                    else
+                                        messageView.setText("Ваш ход");
+                                    renderBoard();
+                                    isPlayersMoved = false;
+                                    isTimerStopped = false;
+                                }
                             }
-                        }
-                    });
-                }
-            }, 0, 1000);
+                        });
+                    }
+                }, 0, 1000);
+            }
         }
     }
 
@@ -400,8 +411,9 @@ public class GameActivity extends AppCompatActivity {
 
         List<Cell> availCells = new ArrayList<>();
 
-        if ((colorPlayer == 2 && (board.getCell(begI, begJ) == COLOR_ENEMY || board.getCell(begI, begJ) == COLOR_ENEMY_KING))
-                || (colorPlayer == 1 && (board.getCell(begI, begJ) == COLOR_PLAYER || board.getCell(begI, begJ) == COLOR_PLAYER_KING))) {
+        if (((colorPlayer == COLOR_ENEMY || colorPlayer == COLOR_ENEMY_KING) && (board.getCell(begI, begJ) == COLOR_ENEMY || board.getCell(begI, begJ) == COLOR_ENEMY_KING))
+                || ((colorPlayer == COLOR_PLAYER || colorPlayer == COLOR_PLAYER_KING) && (board.getCell(begI, begJ) == COLOR_PLAYER || board.getCell(begI, begJ) == COLOR_PLAYER_KING))) {
+          //  colorPlayer = board.getCell(begI, begJ);
             for (int i = 0; i < ROWS; i++) {
                 for (int j = 0; j < COLUMNS; j++) {
                     if (board.getCell(i, j) == 0) {
@@ -482,11 +494,15 @@ public class GameActivity extends AppCompatActivity {
             if ((j < 7 && mBoard.getArr()[i + 1][j + 1] == COLOR_PLAYER) || (j > 0 && mBoard.getArr()[i + 1][j - 1] == COLOR_PLAYER))
                 return true;
         }
+        if (i < 7) {
+            if ((j < 7 && mBoard.getArr()[i + 1][j + 1] == COLOR_PLAYER_KING) || (j > 0 && mBoard.getArr()[i + 1][j - 1] == COLOR_PLAYER_KING))
+                return true;
+        }
         return false;
     }
 
     //Получить часть дерева для выбранного idxParent
-    private void createTree(int idxParent) {
+    private boolean createTree(int idxParent) {
         int colorCurrentPlayer = isMaxLevel(tree.getLevelNode(idxParent)) ? COLOR_ENEMY : COLOR_PLAYER;
         ArrayList<PairCell> availMoves = new ArrayList<>();
         //Находим все возможные ходы на данный момент
@@ -499,11 +515,14 @@ public class GameActivity extends AppCompatActivity {
                     if (idxParent < tree.getNodes().size())
                         arrayList = getAvailCellsInBoard(tree.getNodes().get(idxParent).getBoard(), i, j, colorCurrentPlayer);
                 }
-
                 for (int k = 0; k < arrayList.size(); k++) {
                     availMoves.add(new PairCell(new Cell(i, j), arrayList.get(k)));
                 }
             }
+        }
+
+        if (availMoves.isEmpty()) {
+            return false;
         }
         //Добавляем все возможные ходы в дерево решений с родителем первым ходом
         for (int j = 0; j < availMoves.size(); j++) {
@@ -534,6 +553,7 @@ public class GameActivity extends AppCompatActivity {
                 }
             }
         }
+        return true;
     }
 
     //Расставляем мин и макс на уровне level (Последовательно)
@@ -644,8 +664,9 @@ public class GameActivity extends AppCompatActivity {
             int idxParent = 0;
             long start = System.currentTimeMillis();
 
-            while (tree.getLevelNode(tree.getNodes().get(tree.getNodes().size() - 1).getIdxParent()) <= maxDeep) {
-                createTree(idxParent);
+            boolean isCreate = true;
+            while (isCreate && tree.getLevelNode(tree.getNodes().get(tree.getNodes().size() - 1).getIdxParent()) <= maxDeep && !board.isEndOfGame(this, countOfPlayers)) {
+                isCreate = createTree(idxParent);
                 idxParent++;
             }
             long end = System.currentTimeMillis();

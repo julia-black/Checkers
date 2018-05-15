@@ -42,24 +42,24 @@ public class Board {
         temp = 0;
         score = new Score();
         //первоначальная расстановка шашек
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                if (((i == 0 || i == 2) && j % 2 != 0)
-                        || (i == 1 && j % 2 == 0)) {
-                    arr[i][j] = 2;
-                } else if ((i == 5 || i == 7) && j % 2 == 0
-                        || (i == 6 && j % 2 != 0)) {
-                    arr[i][j] = 1;
-                } else if (i == 3 && j % 2 == 0 || i == 4 && j % 2 != 0) {
-                    arr[i][j] = 0;
-                } else
-                    arr[i][j] = 3;
-            }
-        }
+          for (int i = 0; i < N; i++) {
+              for (int j = 0; j < N; j++) {
+                  if (((i == 0 || i == 2) && j % 2 != 0)
+                          || (i == 1 && j % 2 == 0)) {
+                      arr[i][j] = 2;
+                  } else if ((i == 5 || i == 7) && j % 2 == 0
+                          || (i == 6 && j % 2 != 0)) {
+                      arr[i][j] = 1;
+                  } else if (i == 3 && j % 2 == 0 || i == 4 && j % 2 != 0) {
+                      arr[i][j] = 0;
+                  } else
+                      arr[i][j] = 3;
+              }
+          }
     }
 
     private boolean isBadMoveWhite(int i, int j, int color) {
-        if (color == COLOR_ENEMY) {
+        if (color == COLOR_ENEMY || color == COLOR_ENEMY_KING) {
             if (i < 7) {
                 if ((j < 7 && arr[i + 1][j + 1] == COLOR_PLAYER) || (j > 0 && arr[i + 1][j - 1] == COLOR_PLAYER))
                     return true;
@@ -74,7 +74,7 @@ public class Board {
         int countWhite = 0;
         int countKingBlack = 0;
         int countKingWhite = 0;
-        int k = isBadMoveWhite(x, y, color) ? 1 : 0;
+        int k = isBadMoveWhite(x, y, color) ? 2 : 0;
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 switch (arr[i][j]) {
@@ -126,7 +126,6 @@ public class Board {
     //1 - идут без взятия
     //2 - со взятием
     public int moveChecker(List<PairCell> mandatoryMoves, int begI, int begJ, int i, int j, int checker, Context context) { //checker - цвет выбранной шашки
-        // Log.i(LOG_TAG, mandatoryMoves.toString());
         if (!GameActivity.noMoves) {
             if (mandatoryMoves.isEmpty()) {
                 if (checker == getCell(begI, begJ) || (checker == 2 && (getCell(begI, begJ) == COLOR_ENEMY || getCell(begI, begJ) == COLOR_ENEMY_KING))
@@ -192,8 +191,10 @@ public class Board {
     public int moveCheckerWithoutToast(List<PairCell> mandatoryMoves, int begI, int begJ, int i, int j, int checker, Context context) { //checker - цвет выбранной шашки
         if (!GameActivity.noMoves) {
             if (mandatoryMoves.isEmpty()) {
-                if (getCell(begI, begJ) == checker) { //если в этой ячейке стоит такой цвет
+                if (checker == getCell(begI, begJ) || (checker == 2 && (getCell(begI, begJ) == COLOR_ENEMY || getCell(begI, begJ) == COLOR_ENEMY_KING))
+                        || (checker == 1 && (getCell(begI, begJ) == COLOR_PLAYER || getCell(begI, begJ) == COLOR_PLAYER_KING))) {
                     if (arr[i][j] == 0) { //если конечная клетка пуста
+                        checker = getCell(begI, begJ);
                         if (isValidMove(begI, begJ, i, j, checker) != 0) {
                             if (isValidMove(begI, begJ, i, j, checker) == 1) {
                                 setCell(i, j, checker);
@@ -222,6 +223,7 @@ public class Board {
                     return 0;
                 }
             } else {
+                checker = getCell(begI, begJ);
                 PairCell pairCell = new PairCell(new Cell(begI, begJ), new Cell(i, j));
                 //если ход игрока является одним из обязательных ходов
                 if (getCell(begI, begJ) == checker && arr[i][j] == 0
@@ -233,7 +235,7 @@ public class Board {
                     checkKing(i, j, checker);
                     return 2;
                 } else {
-                    Log.i(LOG_TAG, "mandatory moves not empty, but error" + checker + " " + getCell(begI, begJ) + " " + begI + " " + begJ + " " + i + "," + j);
+                    Log.i(LOG_TAG, "mandatory moves not empty, but error" + checker + " " + getCell(begI, begJ) + " " + begI + "," + begJ + " " + i + "," + j);
                     return 0;
                 }
             }
@@ -293,16 +295,17 @@ public class Board {
                     if (checker == COLOR_PLAYER || (checker == COLOR_PLAYER_KING && begI > i)) {
                         if ((i < 7 && j < 7) && (j == begJ - 2 && (arr[i + 1][j + 1] == COLOR_ENEMY || arr[i + 1][j + 1] == COLOR_ENEMY_KING))) {
                             return 2;
-                        } else if ((i < 7 && j > 0) && (j == begJ + 2 && (arr[i + 1][j - 1] == COLOR_ENEMY || arr[i + 1][j - 1] == COLOR_ENEMY_KING))) {
+                        } else if ((i < 7) && (j == begJ + 2 && (arr[i + 1][j - 1] == COLOR_ENEMY || arr[i + 1][j - 1] == COLOR_ENEMY_KING))) {
                             return 2;
                         }
                     }
                     if (checker == COLOR_PLAYER_KING) {
-                        if ((i > 0 && begI > 0) && (j == begJ - 2 && (arr[i - 1][begJ - 1] == COLOR_ENEMY || arr[i - 1][begJ - 1] == COLOR_ENEMY_KING))) {
+                        if ((i > 0) && (j == begJ - 2 && (arr[i - 1][begJ - 1] == COLOR_ENEMY || arr[i - 1][begJ - 1] == COLOR_ENEMY_KING))) {
                             return 2;
-                        } else if ((i > 0 && j > 0) && (j == begJ + 2 && (arr[i - 1][j - 1] == COLOR_ENEMY || arr[i - 1][j - 1] == COLOR_ENEMY_KING))) {
+                        } else if ((i > 0) && (j == begJ + 2 && (arr[i - 1][j - 1] == COLOR_ENEMY || arr[i - 1][j - 1] == COLOR_ENEMY_KING))) {
                             return 2;
                         }
+
                     }
                 }
             }
@@ -336,9 +339,9 @@ public class Board {
             }
         }
         if (checker == COLOR_PLAYER_KING) {
-            if (j == begJ - 2 && (arr[i - 1][begJ - 1] == COLOR_ENEMY || arr[i - 1][begJ - 1] == COLOR_ENEMY_KING)) {
+            if (j == begJ - 2 && i > 0 && (arr[i - 1][begJ - 1] == COLOR_ENEMY || arr[i - 1][begJ - 1] == COLOR_ENEMY_KING)) {
                 captureEnemyChecker(i - 1, begJ - 1, arr[i - 1][begJ - 1]);
-            } else if (j == begJ + 2 && (arr[i - 1][j - 1] == COLOR_ENEMY || arr[i - 1][j - 1] == COLOR_ENEMY_KING)) {
+            } else if (j == begJ + 2 && i > 0 && (arr[i - 1][j - 1] == COLOR_ENEMY || arr[i - 1][j - 1] == COLOR_ENEMY_KING)) {
                 captureEnemyChecker(i - 1, j - 1, arr[i - 1][j - 1]);
             }
         }
@@ -391,6 +394,61 @@ public class Board {
             }
             return true;
         } else if (GameActivity.noMoves) {
+            return true;
+        }
+
+        int countBlack = 0;
+        int countWhite = 0;
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                switch (arr[i][j]) {
+                    case COLOR_PLAYER:
+                        countBlack++;
+                        break;
+                    case COLOR_ENEMY:
+                        countWhite++;
+                        break;
+                    case COLOR_PLAYER_KING:
+                        countBlack++;
+                        break;
+                    case COLOR_ENEMY_KING:
+                        countWhite++;
+                }
+            }
+        }
+        if (countBlack == 0) {
+            if (countOfPlayers == 1 && temp == 0) {
+                temp = 1;
+                toast = Toast.makeText(context,
+                        "К сожалению, Вы проиграли.",
+                        Toast.LENGTH_SHORT);
+                toast.show();
+            } else {
+                if (temp == 0) {
+                    temp = 1;
+                    toast = Toast.makeText(context,
+                            "Победа за игроком №2! Поздравляем!",
+                            Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+            }
+            return true;
+        } else if (countWhite == 0) {
+            if (countOfPlayers == 1 && temp == 0) {
+                temp = 1;
+                toast = Toast.makeText(context,
+                        "Поздравляем! Вы победили!",
+                        Toast.LENGTH_SHORT);
+                toast.show();
+            } else {
+                if (temp == 0) {
+                    temp = 1;
+                    toast = Toast.makeText(context,
+                            "Победа за игроком №1! Поздравляем!",
+                            Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+            }
             return true;
         }
         return false;
