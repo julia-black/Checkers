@@ -272,12 +272,7 @@ public class GameActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        onDestroy();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
+      finish();
     }
 
     //Показать результат игры
