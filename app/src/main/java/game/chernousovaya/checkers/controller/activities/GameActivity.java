@@ -408,11 +408,10 @@ public class GameActivity extends AppCompatActivity {
 
         if (((colorPlayer == COLOR_ENEMY || colorPlayer == COLOR_ENEMY_KING) && (board.getCell(begI, begJ) == COLOR_ENEMY || board.getCell(begI, begJ) == COLOR_ENEMY_KING))
                 || ((colorPlayer == COLOR_PLAYER || colorPlayer == COLOR_PLAYER_KING) && (board.getCell(begI, begJ) == COLOR_PLAYER || board.getCell(begI, begJ) == COLOR_PLAYER_KING))) {
-          //  colorPlayer = board.getCell(begI, begJ);
             for (int i = 0; i < ROWS; i++) {
                 for (int j = 0; j < COLUMNS; j++) {
                     if (board.getCell(i, j) == 0) {
-                        int flag = board.isValidMove(begI, begJ, i, j, colorPlayer);
+                        int flag = board.isValidMove(begI, begJ, i, j, board.getCell(begI, begJ));
                         if (flag == 1) {
                             availCells.add(new Cell(i, j));
                         } else if (flag == 2) {
@@ -498,16 +497,18 @@ public class GameActivity extends AppCompatActivity {
 
     //Получить часть дерева для выбранного idxParent
     private boolean createTree(int idxParent) {
+        //определяем цвет текущего игрока
         int colorCurrentPlayer = isMaxLevel(tree.getLevelNode(idxParent)) ? COLOR_ENEMY : COLOR_PLAYER;
         ArrayList<PairCell> availMoves = new ArrayList<>();
         //Находим все возможные ходы на данный момент
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLUMNS; j++) {
                 List<Cell> arrayList = new ArrayList<>();
-                if (idxParent == -1) {
+                if (idxParent == -1) { //если родитель = -1, то это нулевой уровень
                     arrayList = getAvailCellsInBoard(mBoard, i, j, colorCurrentPlayer);
                 } else {
                     if (idxParent < tree.getNodes().size())
+                        //присваиваем списку все доступные ходы для данной клетки
                         arrayList = getAvailCellsInBoard(tree.getNodes().get(idxParent).getBoard(), i, j, colorCurrentPlayer);
                 }
                 for (int k = 0; k < arrayList.size(); k++) {
@@ -538,6 +539,7 @@ public class GameActivity extends AppCompatActivity {
                             availMoves.get(j).getmEndCell().getX(), availMoves.get(j).getmEndCell().getY(), colorCurrentPlayer, this);
                     if (res != 0) {
                         if (res == 2) {
+                            //если перемещение вернуло результат = 2, это значит, что мы ходили со взятием
                             tree.addChildren(availMoves.get(j), newBoard, idxParent, tree.getLevelNode(idxParent),
                                     newBoard.evaluationFunction(availMoves.get(j).getmEndCell().getX(), availMoves.get(j).getmEndCell().getY(), colorCurrentPlayer));
                             break;
@@ -700,9 +702,10 @@ public class GameActivity extends AppCompatActivity {
     //Расставляем мин и макс на уровне = level (Параллельно)
     private void parallelMinMax(int level, int lastLevel) {
         ArrayList<Tree.Node> listAll = tree.getNodesByLevel(level);
-        int countThreads = Runtime.getRuntime().availableProcessors(); //Кол-во потоков равное число доступных процессоров
-
-        ExecutorService pool = Executors.newFixedThreadPool(countThreads); //Создаем пул потоков
+        //Кол-во потоков равное число доступных процессоров
+        int countThreads = Runtime.getRuntime().availableProcessors();
+        //Создаем пул потоков
+        ExecutorService pool = Executors.newFixedThreadPool(countThreads);
         List<Callable<Object>> tasks = new ArrayList<>();
         try {
             for (int i = 0; i < listAll.size(); i++) {
@@ -737,7 +740,6 @@ public class GameActivity extends AppCompatActivity {
                     return null;
                 });
             }
-
             List<Future<Object>> invokeAll = pool.invokeAll(tasks);
         } catch (InterruptedException e) {
             e.printStackTrace();

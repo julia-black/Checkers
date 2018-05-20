@@ -56,6 +56,23 @@ public class Board {
                       arr[i][j] = 3;
               }
           }
+
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                if (((i == 0 || i == 2) && j % 2 != 0)
+                        || (i == 1 && j % 2 == 0)) {
+                    arr[i][j] = 0;
+                } else if ((i == 5 || i == 7) && j % 2 == 0
+                        || (i == 6 && j % 2 != 0)) {
+                    arr[i][j] = 0;
+                } else if (i == 3 && j % 2 == 0 || i == 4 && j % 2 != 0) {
+                    arr[i][j] = 0;
+                } else
+                    arr[i][j] = 3;
+            }
+            arr[6][3] = 4;
+            arr[6][5] = 5;
+        }
     }
 
     private boolean isBadMoveWhite(int i, int j, int color) {
