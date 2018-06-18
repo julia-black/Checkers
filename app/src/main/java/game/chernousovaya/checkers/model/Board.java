@@ -42,37 +42,42 @@ public class Board {
         temp = 0;
         score = new Score();
         //первоначальная расстановка шашек
-          for (int i = 0; i < N; i++) {
-              for (int j = 0; j < N; j++) {
-                  if (((i == 0 || i == 2) && j % 2 != 0)
-                          || (i == 1 && j % 2 == 0)) {
-                      arr[i][j] = 2;
-                  } else if ((i == 5 || i == 7) && j % 2 == 0
-                          || (i == 6 && j % 2 != 0)) {
-                      arr[i][j] = 1;
-                  } else if (i == 3 && j % 2 == 0 || i == 4 && j % 2 != 0) {
-                      arr[i][j] = 0;
-                  } else
-                      arr[i][j] = 3;
-              }
-          }
+       for (int i = 0; i < N; i++) {
+           for (int j = 0; j < N; j++) {
+               if (((i == 0 || i == 2) && j % 2 != 0)
+                       || (i == 1 && j % 2 == 0)) {
+                   arr[i][j] = 2;
+               } else if ((i == 5 || i == 7) && j % 2 == 0
+                       || (i == 6 && j % 2 != 0)) {
+                   arr[i][j] = 1;
+               } else if (i == 3 && j % 2 == 0 || i == 4 && j % 2 != 0) {
+                   arr[i][j] = 0;
+               } else
+                   arr[i][j] = 3;
+           }
+       }
 
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                if (((i == 0 || i == 2) && j % 2 != 0)
-                        || (i == 1 && j % 2 == 0)) {
-                    arr[i][j] = 0;
-                } else if ((i == 5 || i == 7) && j % 2 == 0
-                        || (i == 6 && j % 2 != 0)) {
-                    arr[i][j] = 0;
-                } else if (i == 3 && j % 2 == 0 || i == 4 && j % 2 != 0) {
-                    arr[i][j] = 0;
-                } else
-                    arr[i][j] = 3;
-            }
-            arr[6][3] = 4;
-            arr[6][5] = 5;
-        }
+       //for (int i = 0; i < N; i++) {
+       //    for (int j = 0; j < N; j++) {
+       //        if (((i == 0 || i == 2) && j % 2 != 0)
+       //                || (i == 1 && j % 2 == 0)) {
+       //            arr[i][j] = 0;
+       //        } else if ((i == 5 || i == 7) && j % 2 == 0
+       //                || (i == 6 && j % 2 != 0)) {
+       //            arr[i][j] = 0;
+       //        } else if (i == 3 && j % 2 == 0 || i == 4 && j % 2 != 0) {
+       //            arr[i][j] = 0;
+       //        } else
+       //            arr[i][j] = 3;
+       //    }
+       //}
+       //arr[4][3] = 2;
+       //arr[7][0] = 1;
+       //arr[7][2] = 1;
+       //arr[7][4] = 1;
+       //arr[6][1] = 1;
+       //showBoard();
+
     }
 
     private boolean isBadMoveWhite(int i, int j, int color) {
